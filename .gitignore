@@ -21,3 +21,14 @@ deep_models/outputs/top_journal_preregistered/checkpoints_pre_safe_serialization
 # Superseded dependency-era prototype: retain the physical file as a local
 # audit copy, but keep it out of the publishable main branch tree.
 /deep_models/grouped_hs3i_current_data.py
+
+# Original-branch algorithm and extraction scripts. Keep physical local audit
+# copies, while publishing them only from the immutable `original` branch.
+/1d_cnn_holdout_prediction_5fold.py
+/knn_rf_lr_holdout_prediction_5fold.py
+/no_selecvar_holdout_prediction_5fold.py
+/selecvar_holdout_prediction_5fold.py
+/svm_plsda_holdout_prediction_5fold.py
+/main.m
+/data/main.m
+/data/main.asv

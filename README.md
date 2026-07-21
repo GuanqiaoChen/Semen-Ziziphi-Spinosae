@@ -2,7 +2,7 @@
 
 本仓库已完成一套**结果前冻结、来源立方体完全隔离、包含强基线与反事实证伪**的当前数据分析。研究对象是 8 个存档商业样品标签、16 个来源高光谱立方体和 1,264 粒立方体内技术子样本；不会把种子数误写成独立产地重复。
 
-`original` 是不可变审计基线；`main` 的正式方法独立于旧脚本，按顶刊级方法学标准设计。当前唯一正式深度分析入口是 [deep_models/top_journal_current_data.py](deep_models/top_journal_current_data.py)，完整协议与复现说明见 [deep_models/README.md](deep_models/README.md)。
+`original` 是不可变审计基线；初始 Python 算法和 MATLAB 提取脚本只在该分支及本地忽略副本中保留，不属于 `main` 当前发布树。`main` 的正式代码由 `current_data_study/` 经典审计和 `deep_models/` 预注册方法组成，独立于旧脚本并按顶刊级方法学标准设计。当前唯一正式深度分析入口是 [deep_models/top_journal_current_data.py](deep_models/top_journal_current_data.py)，完整协议与复现说明见 [deep_models/README.md](deep_models/README.md)。
 
 ## 正式分析状态
 
