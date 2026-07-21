@@ -12,3 +12,12 @@ Thumbs.db
 deep_models/outputs/*
 !deep_models/outputs/top_journal_preregistered/
 !deep_models/outputs/top_journal_preregistered/**
+
+# Preserve the first, numerically identical post-processing pass locally as a
+# figure-QA audit snapshot; publish only the corrected canonical figures.
+deep_models/outputs/top_journal_preregistered/postprocessing_pre_figure_qa/
+deep_models/outputs/top_journal_preregistered/checkpoints_pre_safe_serialization/
+
+# Superseded dependency-era prototype: retain the physical file as a local
+# audit copy, but keep it out of the publishable main branch tree.
+/deep_models/grouped_hs3i_current_data.py

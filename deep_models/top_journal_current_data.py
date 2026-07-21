@@ -1453,7 +1453,7 @@ def run_analysis(
                                 "run_id": run_id,
                                 "state_dict": model.state_dict(),
                                 "temperature": temperature,
-                                "wavelengths_nm": wavelengths,
+                                "wavelengths_nm": wavelengths.tolist(),
                                 "protocol": "training-suffix internal validation; test untouched",
                             },
                             output_dir / f"{run_id}.pt",

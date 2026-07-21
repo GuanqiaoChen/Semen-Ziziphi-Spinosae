@@ -203,6 +203,14 @@ class CalibrationTests(unittest.TestCase):
             self.assertAlmostEqual(total, 1.0)
 
 
+class DisplayTests(unittest.TestCase):
+    def test_locked_direction_labels_do_not_expose_code_tokens(self):
+        self.assertEqual(summary._direction_label("suffix_1_to_2"), "1 → 2")
+        self.assertEqual(summary._direction_label("suffix_2_to_1"), "2 → 1")
+        with self.assertRaises(ValueError):
+            summary._direction_label("suffix_1_and_2")
+
+
 class EndToEndTests(unittest.TestCase):
     def test_synthetic_complete_run_generates_auditable_tables_and_figures(self):
         with tempfile.TemporaryDirectory() as temporary:

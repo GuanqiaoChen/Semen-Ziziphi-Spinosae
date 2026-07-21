@@ -705,6 +705,14 @@ def _save_figure(fig: Any, output_dir: Path, stem: str) -> None:
     plt.close(fig)
 
 
+def _direction_label(direction: str) -> str:
+    """Render a locked suffix-transfer identifier without leaking code tokens."""
+
+    if direction not in DIRECTIONS:
+        raise ValueError(f"Unknown locked direction: {direction}")
+    return direction.removeprefix("suffix_").replace("_to_", " → ")
+
+
 def plot_main_performance(main_rows: Sequence[Mapping[str, Any]], output_dir: Path) -> None:
     selected = [
         row
@@ -746,7 +754,7 @@ def plot_main_performance(main_rows: Sequence[Mapping[str, Any]], output_dir: Pa
             )
         axis.axhline(CHANCE_BALANCED_ACCURACY, color="0.6", linestyle="--", linewidth=0.8)
         axis.set_xticks(x, labels, rotation=18, ha="right")
-        axis.set_title(direction.replace("suffix_", "").replace("_", " → "))
+        axis.set_title(_direction_label(direction))
         axis.set_ylim(0.0, 1.02)
         axis.grid(axis="y", color="0.9", linewidth=0.7)
     axes[0].set_ylabel("Balanced accuracy")
@@ -793,7 +801,7 @@ def plot_counterfactuals(main_rows: Sequence[Mapping[str, Any]], output_dir: Pat
             marker=markers[direction_index],
             linewidth=1.5,
             markersize=5,
-            label=direction.replace("suffix_", "").replace("_", " → "),
+            label=_direction_label(direction),
         )
     axis.axhline(CHANCE_BALANCED_ACCURACY, color="0.6", linestyle="--", linewidth=0.8, label="chance")
     axis.set_xticks(x, condition_labels)
@@ -839,7 +847,7 @@ def plot_calibration(reliability_rows: Sequence[Mapping[str, Any]], output_dir: 
             if row_index == 0:
                 axis.set_title(("SNV–LR", "Spectral net", "Fusion net")[column_index])
             if column_index == 0:
-                axis.set_ylabel(f"{direction.replace('suffix_', '').replace('_', ' → ')}\nObserved accuracy")
+                axis.set_ylabel(f"{_direction_label(direction)}\nObserved accuracy")
             if row_index == 1:
                 axis.set_xlabel("Mean confidence")
     handles, labels = axes[0, 0].get_legend_handles_labels()
@@ -879,13 +887,21 @@ def plot_confusions(confusion_rows: Sequence[Mapping[str, Any]], output_dir: Pat
             axis.set_xticks(range(NUM_CLASSES), CLASS_NAMES, rotation=45, ha="right")
             axis.set_yticks(range(NUM_CLASSES), CLASS_NAMES)
             if column_index == 0:
-                axis.set_ylabel(f"{direction.replace('suffix_', '').replace('_', ' → ')}\nTrue class")
+                axis.set_ylabel(f"{_direction_label(direction)}\nTrue class")
             if row_index == 1:
                 axis.set_xlabel("Predicted class")
-    colorbar = fig.colorbar(image, ax=axes, shrink=0.75, pad=0.02)
+    fig.subplots_adjust(
+        left=0.08,
+        right=0.88,
+        bottom=0.11,
+        top=0.93,
+        wspace=0.12,
+        hspace=0.18,
+    )
+    colorbar_axis = fig.add_axes((0.91, 0.19, 0.015, 0.62))
+    colorbar = fig.colorbar(image, cax=colorbar_axis)
     colorbar.set_label("Row-normalized fraction")
     fig.suptitle("Full-input calibrated probability-ensemble confusion matrices", y=0.99, fontsize=11)
-    fig.subplots_adjust(left=0.08, right=0.91, bottom=0.11, top=0.93, wspace=0.12, hspace=0.18)
     _save_figure(fig, output_dir, "figure_ensemble_confusion_matrices")
 
 

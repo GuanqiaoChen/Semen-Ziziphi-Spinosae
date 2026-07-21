@@ -1,116 +1,181 @@
-# 当前数据的分组 3D 高光谱分析
+# 当前数据的预注册来源立方体隔离分析
 
-## 状态与边界
+## 状态、入口与证据范围
 
-本目录是一套**环境与前向路径已验证、但尚未正式运行训练**的深度学习分析协议。项目 `.venv` 已安装 `torch 2.12.1+cu126`、`h5py 3.16.0` 及锁定的科学计算依赖；RTX 4060 CUDA 运算、真实 MAT 读取以及 HS3I/无 SelecVar 单样本前向路径均已通过。**没有产生任何新的 3D-CNN、HS3I-Net、空间打乱或 mask-only 性能结果**。只有在固定协议实际完成后，才能把输出标记为“新执行结果”。
+本目录的正式分析已于 2026-07-21 完整执行并标记为 `executed_complete`。当前唯一正式入口是 [top_journal_current_data.py](top_journal_current_data.py)，锁定后处理入口是 [summarize_top_journal_results.py](summarize_top_journal_results.py)，结果前冻结的方案见 [当前数据顶刊方法预注册](../docs/当前数据顶刊方法预注册.md)。
 
-脚本：[grouped_hs3i_current_data.py](grouped_hs3i_current_data.py)
+本次分析按顶刊级方法学审计规范实施：预先固定研究问题和估计量、来源立方体完全隔离、测试集不参与开发、强光谱基线、共享初始化的深度消融、同一锁定模型反事实、概率校准、正确层级的条件性不确定性以及可追溯逐样本产物。
 
-这套分析只回答一个受限问题：使用当前 16 个来源立方体时，模型能否从一组完整立方体迁移到另一组完整立方体。它不能把当前数据变成独立农场、批次、年份或仪器验证，也不能单独证明地理产地因果效应。
+这些方法不能创造数据中不存在的生物学重复。当前数据只有 8 个存档商业样品标签、16 个来源立方体和 1,264 粒立方体内技术子样本；每个方向、每类只有 1 个测试来源立方体。因此结果是**当前配对来源立方体之间的闭集迁移诊断**，不是地理产地外部验证。
 
-## 与旧分析相比的关键修正
+## 冻结协议
 
-- 来源立方体完整隔离：只执行 `所有 *-1 训练 → 所有 *-2 测试` 和反向分析。一个来源立方体中的种子不会跨训练集和测试集。
-- 测试集不参与开发：固定训练轮数，不做早停，不根据测试指标选择模型、检查点、波段、随机种子或超参数；测试 MAT patch 只在固定训练完成后迭代一次。
-- 波长来自真实 CSV：读取每个种子配套 CSV 的第一列，要求 392 个波长严格递增且全数据一致；不再用首末波长线性插值。
-- 同一主干显式切换 `HS3I/SelecVar` 与 `无 SelecVar`，避免两份脚本继续漂移。
-- 加入空间信息的否证对照：`spatial_shuffle` 在前景内以完整像素光谱为单位打乱位置；`mask_only` 删除所有光谱与强度，只保留轮廓、面积、方向和 patch 位置。
-- 固定多个训练随机种子，分别保存结果；随机种子间波动只表示训练不稳定性，不是对新批次泛化误差的置信区间。
-- 不提供 Grad-CAM。现有网络末端单元的光谱感受野很宽，将其归因到单一 nm 会制造虚假精度。SelecVar 权重按真实波长导出，但仍只属于模型参数，不能当作化学机制证据。
+### 分析单位与拆分
 
-## 固定协议
+- 数据：`data/0-1` 至 `data/7-2` 的全部同名 MAT/CSV 对，共 1,264 粒种子、392 个实测波长、16 个来源立方体。
+- 互反测试：全部 `*-1` 立方体开发 → 全部 `*-2` 测试；以及全部 `*-2` 开发 → 全部 `*-1` 测试。
+- 来源隔离：任一来源立方体只属于开发或测试一侧，测试立方体不参与模型、epoch、超参数、温度或输入变换选择。
+- 开发内控制：每个开发立方体按固定规则做 80% 拟合、20% 验证，仅用于模型控制、checkpoint 选择和温度缩放。它仍是同立方体内的种子级验证，不能解释为独立分组验证。
+- 数据完整性：逐文件 SHA-256 写入 manifest；MAT 前景平均与同名 CSV 光谱对 1,264 个样本全部通过 `1e-5` 容差核验，最大绝对差为 `2.8260272e-7`。
 
-默认完整运行包含：
+### 固定模型与训练矩阵
 
-- 两个方向：`suffix_1_to_2`、`suffix_2_to_1`；
-- 两个模型：`hs3i`、`no_selecvar`；
-- 三种输入：`full`、`spatial_shuffle`、`mask_only`；
-- 三个预先声明的训练种子：`42`、`2024`、`2025`。
+正式矩阵按运行清单包含 18 个训练单元（其中 `snv_lr` 单元是模型拟合）：
 
-因此默认共训练 36 个模型。固定超参数保留原研究的主体设定：360 epochs、10-epoch warm-up、AdamW、主干学习率 `3e-4`、SelecVar 学习率 `1e-3`、label smoothing、Mixup 和相同的残差 3D 主干。学习率调度被统一成单一的 warm-up + cosine schedule，避免旧脚本中两个 scheduler 先后作用造成不透明行为。batch size 固定为 16，以降低该 3D 网络的显存压力。
+\[
+2\ \text{个方向}\times 3\ \text{个模型}\times 3\ \text{个种子}=18。
+\]
 
-模型/条件 CLI 参数仅用于执行预先定义的实验单元，例如分批占用 GPU；不得在看过测试结果后据此删选“最好”的单元。正式报告应运行完整矩阵并披露全部随机种子。
+三个模型为：
 
-## 环境与运行
+- `snv_lr`：每粒种子的前景平均光谱做 SNV，再由开发集拟合标准化和类别等权多项 logistic regression；`C={0.01, 0.1, 1, 10, 100}` 仅在开发内验证选择。
+- `spectral_only`：SNV 平均光谱进入一维残差编码器；参数量 79,624，是融合模型的深度光谱消融。
+- `fusion_net`：同一一维残差光谱分支加高效空间分支；空间分支先逐像素学习 `392→16` 谱投影，再用二维残差编码；参数量 209,000。
 
-当前验证环境为 Python 3.11.9、PyTorch 2.12.1+cu126、CUDA runtime 12.6、h5py 3.16.0 和 NumPy 2.4.4。项目根目录提供完整 PyPI 锁和独立的官方 CUDA wheel 通道。从仓库根目录重建：
+`spectral_only` 与 `fusion_net` 使用相同拆分、种子、谱分支和分类器结构，并在每个方向/种子配对单元共享初始谱分支与分类器参数；正式输出的初始化哈希核验为通过。
+
+固定优化种子为 `42`、`2024`、`2025`，反事实置乱种子为 `9173`。神经模型统一使用 batch size 32、最多 60 epochs、至少 12 epochs、patience 8、AdamW（学习率 `1e-3`、weight decay `1e-4`）、label smoothing 0.05、梯度裁剪 5.0 和 CUDA AMP。checkpoint 按开发内 validation macro-F1 最大、再按 NLL 最小、再按最早 epoch 的冻结规则选择；温度仅由开发内 validation logits 在固定网格上确定。
+
+### 锁定模型反事实
+
+每个神经训练单元先只用 `full` 输入完成拟合和锁定；随后同一 checkpoint 不再训练，成对测试四种输入：
+
+1. `full`：完整前景高光谱 patch；
+2. `spatial_shuffle`：在前景内移动完整 392 波段像素光谱，删除内部排列但保留轮廓与像素光谱分布；
+3. `mean_broadcast`：把该种子前景平均光谱复制到轮廓内，删除像素异质性和内部排列；
+4. `mask_only`：仅保留二值轮廓，删除实测光谱与强度。
+
+因此，“18 个训练单元”不应误写为 72 次模型训练；四条件是对锁定模型的反事实测试。`spectral_only` 对 `full`、`spatial_shuffle` 与 `mean_broadcast` 的预测一致性也作为反事实实现校验。
+
+### 主要估计量与推断
+
+主要预测器是三个预声明种子的**温度校准概率平均集成**。先对每粒测试种子的 8 类概率求平均，再计算集成指标，不把优化种子当作生物重复。
+
+主要性能估计量为：
+
+\[
+\theta_m=\frac{BA_{1\rightarrow2,m}+BA_{2\rightarrow1,m}}{2}，
+\]
+
+其中每个方向内 8 个类别/来源立方体等权，两个方向再等权。主要机制效应是 `fusion_net(full) - fusion_net(spatial_shuffle)` 的双向等权差。
+
+条件性 95% 区间由 10,000 次配对 block bootstrap 生成，重采样单位是 8 个商业标签对，所有模型与条件共享种子 `20260721` 的同一重采样矩阵。主要机制检验是 8 标签对全部 `2^8=256` 个符号分配的精确 sign-flip 检验。区间和检验只条件于当前 16 个存档立方体，不是新批次总体推断。
+
+## 正式结果
+
+下表均为温度校准三种子概率集成的 balanced accuracy；区间是上述标签对 block bootstrap 的条件性 95% 百分位区间。
+
+| 模型 | `*-1 → *-2` | `*-2 → *-1` | \(\theta\) | 条件性 95% 区间 |
+| --- | ---: | ---: | ---: | ---: |
+| `snv_lr` | 84.77% | 89.11% | 86.94% | 75.38%–96.20% |
+| `spectral_only` | 52.94% | 36.56% | 44.75% | 25.31%–63.58% |
+| `fusion_net` | 43.85% | 48.02% | 45.94% | 31.98%–60.70% |
+
+关键配对效应：
+
+| 对比 | 双向效应 | 条件性 95% 区间 | 解释 |
+| --- | ---: | ---: | --- |
+| `fusion(full) - fusion(spatial_shuffle)` | +13.15 pp | +1.82–+24.38 pp | 主要空间排列效应 |
+| `fusion(spatial_shuffle) - fusion(mean_broadcast)` | +0.28 pp | −0.50–+0.99 pp | 未见稳定无序像素异质性增益 |
+| `fusion(full) - fusion(mean_broadcast)` | +13.43 pp | +1.71–+24.76 pp | 完整空间/异质信息的合并效应 |
+| `fusion(mean_broadcast) - fusion(mask_only)` | +11.99 pp | +4.10–+21.96 pp | 当前数据中的平均光谱增量 |
+| `fusion(full) - spectral_only(full)` | +1.19 pp | −11.29–+15.55 pp | 没有稳定谱空融合优势 |
+| `fusion(full) - snv_lr(full)` | −41.00 pp | −50.86–−31.46 pp | 融合网络显著低于强光谱基线 |
+| `fusion(mask_only) - chance` | +8.02 pp | −5.70–+23.54 pp | 区间跨零，仍须保留形态/裁切捷径解释 |
+
+主要空间效应在 `*-1 → *-2` 为 +0.78 pp、在反向为 +25.52 pp，方向均为正但高度不对称；6/6 个方向×优化种子差均为正，双向均值超过预声明的 2 pp 门槛。精确单侧 sign-flip `p=0.0429688`，双侧敏感性 `p=0.0859375`。因此结果**达到预声明的有限空间排列支持门槛**，但只能说明融合模型在当前配对立方体迁移中使用了可用的前景内部排列信息，不能解释为空间因果、地理组织结构或外部泛化。
+
+融合网络的 \(\theta\) 比 `spectral_only` 只高 1.19 pp，区间跨零，而且两个方向差值一负一正；不能声称稳定优于深度光谱消融。它还比 SNV–LR 低 41.00 pp，区间完全低于零。当前最强性能基线是简洁的 SNV–LR，而不是深度融合模型。
+
+完整中英摘要见 [postprocessing/summary.md](outputs/top_journal_preregistered/postprocessing/summary.md)。
+
+## 环境与复现
+
+正式环境为 Python 3.11.9、NumPy 2.4.4、scikit-learn 1.8.0、h5py 3.16.0、PyTorch 2.12.1+cu126、CUDA 12.6 和 NVIDIA GeForce RTX 4060 Laptop GPU。依赖已锁定在仓库根目录的 `requirements-lock.txt` 与 `requirements-torch-cu126.txt`。
+
+从仓库根目录重建环境：
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\python.exe -m pip install --upgrade pip
 .venv\Scripts\python.exe -m pip install -r requirements-lock.txt
 .venv\Scripts\python.exe -m pip install -r requirements-torch-cu126.txt
+.venv\Scripts\python.exe -m pip check
 ```
 
-从仓库根目录执行完整协议：
+本次正式运行记录的确切命令为：
 
 ```powershell
-python deep_models/grouped_hs3i_current_data.py `
+.venv\Scripts\python.exe deep_models\top_journal_current_data.py `
   --data-root data `
-  --output-dir deep_models/outputs/grouped_confirmatory
-```
-
-如需把实验拆到不同设备上，可显式选择预先定义的单元，例如：
-
-```powershell
-python deep_models/grouped_hs3i_current_data.py `
-  --data-root data `
-  --output-dir deep_models/outputs/hs3i_controls `
-  --models hs3i `
-  --conditions spatial_shuffle mask_only `
+  --output-dir deep_models\outputs\top_journal_preregistered `
+  --models snv_lr spectral_only fusion_net `
   --seeds 42 2024 2025 `
-  --device cuda:0
+  --device cuda:0 `
+  --num-workers 2
 ```
 
-输出目录必须不存在，脚本拒绝覆盖或混合旧结果。`--save-checkpoints` 可额外保存最终参数；这些参数是固定 epoch 的最终状态，不是测试集挑选出的检查点。
+正式运行耗时 `1387.738` 秒，运行前工作树为干净的 `main`，代码提交为 `4bc191c2e9b8a809e866ccd15d96fea29378969d`。脚本要求输出目录不存在，**不要向现有正式目录重复执行**；独立复跑应使用新的空目录，并保留全部预声明单元。
 
-## 结果文件
+锁定后处理的确切命令为：
 
-- `manifest.csv`：逐样本标签、来源立方体、后缀、种子编号和相对路径；
-- `wavelengths.csv`：从 CSV 读取的真实 392 波长；
-- `predictions.csv`：每个方向、模型、条件、随机种子的逐样本预测与 8 类概率；
-- `metrics_by_run.csv`：每次运行的 accuracy、balanced accuracy、macro precision/recall/F1；
-- `metrics_seed_aggregate.csv`：相同实验单元跨随机种子的均值、标准差和范围；
-- `metrics.json`：混淆矩阵、逐类指标、数据指纹、环境、固定超参数和解释限制；
-- `training_history.csv`：逐 epoch 损失和学习率；
-- `selecvar_gate_weights.csv`：HS3I 的门控权重及其真实波长；
-- 可选 `*.pt`：最终模型状态。
+```powershell
+.venv\Scripts\python.exe deep_models\summarize_top_journal_results.py `
+  --input-dir deep_models\outputs\top_journal_preregistered
+```
 
-CSV 使用 UTF-8 with BOM，便于中文 Windows/Excel 环境读取。JSON 中的 `status: executed` 只会在所有计划运行完成后写出；中途失败不会生成一份伪装成完整结果的 JSON 总结。
+默认后处理目录是输入目录下的 `postprocessing`，同样拒绝覆盖已有目录。若对独立复跑后处理，应把 `--input-dir` 指向该完整新输出目录。
 
-## 对照的正确解释
+发布检查点把波长元数据保存为普通 Python 列表，可使用 PyTorch 的安全默认模式加载：
 
-`full` 与 `spatial_shuffle` 的差异用于检验模型是否利用前景内部的空间排列。打乱操作始终移动一个像素的完整 392 波段向量，因此不会人为拆散该像素内部的光谱协方差；轮廓保持不变。
+```python
+checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
+```
 
-`mask_only` 只包含重复到全部波段的二值轮廓。如果它仍有较高准确率，说明类别可能由面积、形状、方向、居中或裁切方式区分，不能把完整模型成绩直接解释为化学或光谱差异。
+正式运行最初生成的检查点含等值 NumPy 波长数组；发布前只对这一元数据序列化格式进行了安全规范化。12 个发布检查点均已在 `weights_only=True` 下加载，并与本地保留的原始版本逐一核对 600 个 state-dict 张量完全相同；模型权重、温度、波长值和全部结果均未改变。
 
-即使 `full` 稳定优于这些对照，也只能支持“在当前两组采集立方体之间存在有用的光谱—空间信息”。由于每个测试类别只有一个来源立方体，而且两后缀是否代表独立商业批次尚不清楚，种子仍是同一立方体内的技术子样本。当前结果不能外推到新农场、收获年、供应商或仪器。
+## 正式产物清单
 
-## 运行前后审计清单
+所有正式产物位于 [outputs/top_journal_preregistered](outputs/top_journal_preregistered/)：
 
-运行前：
+- [results.json](outputs/top_journal_preregistered/results.json) 与 [run_status.json](outputs/top_journal_preregistered/run_status.json)：执行状态、命令、环境、Git、协议、数据指纹、完整运行清单和限制；
+- [manifest.csv](outputs/top_journal_preregistered/manifest.csv)（1,264 行）、[wavelengths.csv](outputs/top_journal_preregistered/wavelengths.csv)、[splits.csv](outputs/top_journal_preregistered/splits.csv)：样本、实测波长和零交叉拆分；
+- [predictions.csv](outputs/top_journal_preregistered/predictions.csv)（45,504 行）与 [ensemble_predictions.csv](outputs/top_journal_preregistered/ensemble_predictions.csv)（15,168 行）：逐样本、逐条件原始/校准概率及三种子集成概率；
+- [metrics.csv](outputs/top_journal_preregistered/metrics.csv)（144 行）、[ensemble_metrics.csv](outputs/top_journal_preregistered/ensemble_metrics.csv)（48 行）、[cube_metrics.csv](outputs/top_journal_preregistered/cube_metrics.csv) 与 [ensemble_cube_metrics.csv](outputs/top_journal_preregistered/ensemble_cube_metrics.csv)：运行、集成和来源立方体层级指标；
+- [primary_estimands.csv](outputs/top_journal_preregistered/primary_estimands.csv) 与 [spatial_mechanism_decision.json](outputs/top_journal_preregistered/spatial_mechanism_decision.json)：主要 \(\theta\) 与冻结门槛判定；
+- [model_selection.csv](outputs/top_journal_preregistered/model_selection.csv)、[development_validation_calibration.csv](outputs/top_journal_preregistered/development_validation_calibration.csv) 和 [training_history.csv](outputs/top_journal_preregistered/training_history.csv)：开发内选择、温度与训练轨迹；
+- [counterfactual_pairs.csv](outputs/top_journal_preregistered/counterfactual_pairs.csv) 与 [ensemble_counterfactual_pairs.csv](outputs/top_journal_preregistered/ensemble_counterfactual_pairs.csv)：逐种子和集成的配对反事实；
+- 12 个可由 `weights_only=True` 安全加载的神经 checkpoint（2 个方向 × 2 个神经模型 × 3 个种子，`*.pt`）；
+- [MAT/CSV 一致性 JSON](outputs/top_journal_preregistered/mat_csv_mean_consistency.json) 与逐样本 CSV：表示完整性审计。
 
-1. 保持上述超参数、模型单元、对照和随机种子不因任何 `*-2` 或 `*-1` 测试表现而改变。
-2. 确认 `data/0-1` 至 `data/7-2` 均存在，且每个 MAT 有同名 CSV。
-3. 记录 Python、PyTorch、CUDA、GPU 和 h5py 版本。
-4. 预留足够时间与显存；默认 36 次、每次 360 epochs，属于高成本完整协议。
+锁定后处理位于 [postprocessing](outputs/top_journal_preregistered/postprocessing/)：
 
-运行后：
+- [summary.md](outputs/top_journal_preregistered/postprocessing/summary.md)：中英双语审计摘要；
+- [bootstrap_theta_intervals.csv](outputs/top_journal_preregistered/postprocessing/bootstrap_theta_intervals.csv)、[bootstrap_effect_intervals.csv](outputs/top_journal_preregistered/postprocessing/bootstrap_effect_intervals.csv) 与 [bootstrap_label_pair_indices.csv](outputs/top_journal_preregistered/postprocessing/bootstrap_label_pair_indices.csv)：条件性区间及共享重采样矩阵；
+- [primary_sign_flip_test.json](outputs/top_journal_preregistered/postprocessing/primary_sign_flip_test.json)、逐标签效应和完整 256 个符号分配：主要精确检验；
+- [postprocessing_manifest.json](outputs/top_journal_preregistered/postprocessing/postprocessing_manifest.json)：输入/输出 SHA-256、锁定常数和推断范围；
+- [主性能图](outputs/top_journal_preregistered/postprocessing/figure_main_performance.pdf)、[反事实效应图](outputs/top_journal_preregistered/postprocessing/figure_counterfactual_effects.pdf)、[集成混淆矩阵](outputs/top_journal_preregistered/postprocessing/figure_ensemble_confusion_matrices.pdf) 与 [校准可靠性图](outputs/top_journal_preregistered/postprocessing/figure_calibration_reliability.pdf)，均同时提供 PNG 和矢量 PDF。
 
-1. 检查终端是否正常完成全部 36 次运行，并确认 `metrics.json` 存在。
-2. 保留全部 seed、双向结果和失败记录，不只报告最好结果。
-3. 对照 `manifest.csv` 确认训练与测试来源立方体交集为空。
-4. 在论文或报告中把这些结果标为“当前数据、来源立方体后缀迁移”，不要写成独立地理产地外部验证。
-5. 按仓库 `AGENTS.md` 要求，把实际执行命令、环境、生成文件、验证和限制追加到研究修订总账；不得把计划运行登记为实测结果。
+## 复现审计要点
 
-## 本次环境与冒烟验证
+正式结果应满足以下不可拆分的完整性条件：
 
-2026-07-21 在仓库 `.venv` 中实际完成：
+1. `results.json` 和后处理 manifest 均为 `executed_complete`，18 个训练单元、两个方向、三个模型和三个种子齐全；
+2. 训练/测试来源立方体交集为空，测试只在开发内选择与温度锁定后访问；
+3. `spectral_only` 与 `fusion_net` 的配对初始化哈希一致；
+4. 所有 8 类概率有限且逐行和为 1，指标可由逐样本概率重算；
+5. 四个反事实对同一神经 checkpoint 测试，不为任何条件重新训练；
+6. 10,000 次区间对所有模型/条件共享同一 8 标签对重采样矩阵，精确检验保留全部 256 个符号分配；
+7. 不删选较好方向、种子、模型或校准版本；原始与温度校准结果均保留；
+8. 任何复跑必须使用新输出目录，不覆盖或拼接正式结果。
+9. 12 个发布 checkpoint 均可安全加载，并与原始正式运行版本逐张量一致。
 
-- `pip check`：无损坏或冲突依赖；
-- CUDA：`torch.cuda.is_available() == True`，识别 NVIDIA GeForce RTX 4060 Laptop GPU，GPU 矩阵运算通过；
-- 数据入口：发现 1,264 个样本和 392 个真实波长，`h5py` 成功读取真实 MAT patch；
-- 模型入口：HS3I 与无 SelecVar 分支各完成一次单样本 GPU 前向计算，输出形状均为 `(1, 8)`；
-- 既有分析回归：`python -m unittest discover -s current_data_study/tests -v` 为 9/9 通过。
+## 不可越过的解释边界
 
-这些检查证明当前依赖、MAT 方向、设备选择和基础前向路径可运行；它们**不证明**360-epoch 训练可稳定完成，也不证明数值收敛、泛化性能或任何空间/光谱优势。首次正式运行必须写入新的输出目录，并将运行时修正、失败和全部预声明结果另行登记。
+- 每类每方向只有一个测试来源立方体，种子是聚类技术子样本；
+- 两个后缀是否代表独立商业批次、供应商或采集会话缺少可核验元数据；
+- 开发内 validation 与温度校准来自同一开发立方体，不能证明跨立方体校准可迁移；
+- 反事实效应诊断的是模型依赖，不是化学因果或组织机制；
+- 当前没有未知类、独立农场/批次、多年份、跨仪器或跨实验室测试。
+
+因此不得把本次结果表述为地理产地认证、真实溯源、防伪系统、独立外部验证、开放集识别、部署就绪或对新来源总体的性能估计。最严格且可辩护的贡献是：一个来源立方体隔离、结果前冻结、包含强基线、反事实证伪、校准和层级不确定性的高光谱方法学审计案例。
