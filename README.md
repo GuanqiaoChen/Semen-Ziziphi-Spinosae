@@ -2,6 +2,8 @@
 
 本仓库已从“以种子级随机拆分证明地理产地鉴别”重构为**来源立方体感知的探索性研究**。原始稿件和旧代码保留用于审计；新分析不会把 1,264 粒种子误写成 1,264 个独立产地重复。
 
+`original` 只作为不可变审计基线；`main` 的算法、依赖和实现不受旧脚本约束。`main` 始终按顶刊证据标准设计方法、基线、消融、证伪、验证和复现流程；若当前数据不足，必须收窄结论，而不是降低方法标准。
+
 ## 首先阅读
 
 1. [研究审查与修订总账](docs/研究审查与修订总账.md)：中文证据审查、顶刊差距、重构路线与只追加修订记录。
@@ -29,7 +31,16 @@ python current_data_study/make_figures.py
 
 ## 深度模型状态
 
-[deep_models/grouped_hs3i_current_data.py](deep_models/grouped_hs3i_current_data.py) 提供来源立方体完全隔离的 HS3I、无 SelecVar、空间打乱和仅掩膜协议，并固定双向拆分与多个训练随机种子。当前环境缺少 PyTorch 与 h5py，因此仅通过语法编译检查，**未训练、无新增深度模型结果**。详见 [deep_models/README.md](deep_models/README.md)。
+[deep_models/grouped_hs3i_current_data.py](deep_models/grouped_hs3i_current_data.py) 提供来源立方体完全隔离的 HS3I、无 SelecVar、空间打乱和仅掩膜协议，并固定双向拆分与多个训练随机种子。项目 `.venv` 已安装并验证 CUDA 版 PyTorch 与 h5py；真实 MAT 读取、RTX 4060 GPU 张量运算以及两个模型分支的单样本前向路径均已通过。**正式 36 单元训练仍未执行，因此仍无新增深度模型性能结果。**详见 [deep_models/README.md](deep_models/README.md)。
+
+从仓库根目录重建相同环境：
+
+```powershell
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install --upgrade pip
+.venv\Scripts\python.exe -m pip install -r requirements-lock.txt
+.venv\Scripts\python.exe -m pip install -r requirements-torch-cu126.txt
+```
 
 ## 结果与图形
 
