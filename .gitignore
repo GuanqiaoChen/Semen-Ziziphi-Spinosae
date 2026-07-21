@@ -7,6 +7,8 @@ venv/
 .DS_Store
 Thumbs.db
 
-# Deep-learning runs can be very large; add a specific verified run explicitly
-# if it must become a versioned release artifact.
-deep_models/outputs/
+# Deep-learning runs can be very large. Ignore exploratory runs while allowing
+# the preregistered, fully audited run to become a versioned release artifact.
+deep_models/outputs/*
+!deep_models/outputs/top_journal_preregistered/
+!deep_models/outputs/top_journal_preregistered/**
