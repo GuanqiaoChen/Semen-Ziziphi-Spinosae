@@ -1,14 +1,22 @@
 {
   "status": "executed_complete",
+  "artifact_naming_migration": {
+    "applied_on": "2026-07-21",
+    "path_names_normalized_after_execution": true,
+    "command_field_semantics": "equivalent_reproduction_command_using_current_repository_paths",
+    "original_execution_command_canonical_sha256": "6725b38f3244c1b23125eb3f80014bb79a7e3322d52f6db56a1c7ed752308d8c",
+    "training_rerun": false,
+    "unchanged_evidence": "model weights, predictions, statistics, execution timestamps, run commit, and data fingerprints"
+  },
   "execution": {
     "started_at_utc": "2026-07-21T21:21:14.856479+00:00",
     "command": [
       "D:\\projects\\Semen-Ziziphi-Spinosae\\.venv\\Scripts\\python.exe",
-      "D:\\projects\\Semen-Ziziphi-Spinosae\\deep_models\\top_journal_current_data.py",
+      "D:\\projects\\Semen-Ziziphi-Spinosae\\deep_models\\source_cube_audit.py",
       "--data-root",
       "data",
       "--output-dir",
-      "deep_models\\outputs\\top_journal_preregistered",
+      "deep_models\\outputs\\source_cube_preregistered_audit",
       "--models",
       "snv_lr",
       "spectral_only",

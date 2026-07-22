@@ -1,4 +1,4 @@
-# 当前数据顶刊方法后处理摘要 / Top-journal current-data post-processing summary
+# 当前数据来源立方体审计后处理摘要 / Source-cube-isolated current-data post-processing summary
 
 ## 中文审计摘要
 

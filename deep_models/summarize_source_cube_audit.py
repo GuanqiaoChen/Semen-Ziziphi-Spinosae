@@ -2,7 +2,7 @@
 """Locked post-processing for the preregistered current-data study.
 
 This script consumes one *complete* output directory produced by
-``deep_models/top_journal_current_data.py``.  All estimands, comparisons,
+``deep_models/source_cube_audit.py``.  All estimands, comparisons,
 bootstrap settings, calibration bins, and figures are fixed below; command-line
 arguments can select paths only.  No result-dependent model or condition
 selection is performed.
@@ -76,7 +76,7 @@ class EffectSpec:
     role: str = "secondary"
 
 
-# Frozen from docs/当前数据顶刊方法预注册.md Sections 2.2, 5, and 6.2.
+# Frozen from docs/来源立方体预注册分析方案.md Sections 2.2, 5, and 6.2.
 EFFECT_SPECS = (
     EffectSpec(
         "primary_fusion_full_minus_spatial_shuffle",
@@ -195,7 +195,7 @@ def validate_complete_output(input_dir: Path) -> dict[str, Any]:
 
     missing = [name for name in REQUIRED_INPUT_FILES if not (input_dir / name).is_file()]
     if missing:
-        raise FileNotFoundError(f"Incomplete top-journal output; missing files: {missing}")
+        raise FileNotFoundError(f"Incomplete preregistered source-cube output; missing files: {missing}")
     run_status = read_json(input_dir / "run_status.json")
     results = read_json(input_dir / "results.json")
     if run_status.get("status") != "executed_complete":
@@ -958,7 +958,7 @@ def build_summary(
     support = bool(mechanism.get("limited_support_for_spatial_arrangement", False))
     chinese_decision = "达到预声明的有限空间排列支持门槛" if support else "未达到预声明的有限空间排列支持门槛"
     english_decision = "met the preregistered limited-support gate" if support else "did not meet the preregistered limited-support gate"
-    return f"""# 当前数据顶刊方法后处理摘要 / Top-journal current-data post-processing summary
+    return f"""# 当前数据来源立方体审计后处理摘要 / Source-cube-isolated current-data post-processing summary
 
 ## 中文审计摘要
 
@@ -1096,7 +1096,7 @@ def summarize(input_dir: Path, output_dir: Path) -> None:
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input-dir", type=Path, required=True, help="Complete top_journal_current_data output directory")
+    parser.add_argument("--input-dir", type=Path, required=True, help="Complete source-cube audit output directory")
     parser.add_argument(
         "--output-dir",
         type=Path,

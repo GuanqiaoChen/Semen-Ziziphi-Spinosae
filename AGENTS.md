@@ -26,13 +26,17 @@ constrained by the architecture, package choices, interfaces, hyperparameters,
 or implementation details of the legacy scripts. Reuse legacy code only when
 independent evidence shows that doing so remains methodologically justified.
 
-Design every `main`-branch method toward top-journal evidentiary standards:
-pre-specified hypotheses and analysis units, leakage-safe validation, strong
-and transparent baselines, ablations and falsification controls, uncertainty
-at the correct independence level, reproducible environments and artifacts,
-and conclusions bounded by the available data. When the current dataset cannot
-support a top-journal claim, preserve the standard and narrow the claim; never
-lower the validation standard or hide a data limitation to retain a result.
+For every `main`-branch method, require pre-specified hypotheses and analysis
+units, leakage-safe validation, strong and transparent baselines, ablations and
+falsification controls, uncertainty at the correct independence level,
+reproducible environments and artifacts, and conclusions bounded by the
+available data. When the current dataset cannot support a claim, narrow the
+claim; never lower the validation standard or hide a data limitation to retain
+a result.
+
+Keep internal publication-target labels out of repository-facing filenames,
+identifiers, prose, and generated metadata. Use descriptive scientific names
+that state the analysis object, design, or artifact role.
 
 Project dependencies may be installed into the repository-local `.venv` when
 needed to implement or validate an authorized algorithm change. Record new

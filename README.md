@@ -2,11 +2,11 @@
 
 本仓库已完成一套**结果前冻结、来源立方体完全隔离、包含强基线与反事实证伪**的当前数据分析。研究对象是 8 个存档商业样品标签、16 个来源高光谱立方体和 1,264 粒立方体内技术子样本；不会把种子数误写成独立产地重复。
 
-`original` 是不可变审计基线；初始 Python 算法和 MATLAB 提取脚本只在该分支及本地忽略副本中保留，不属于 `main` 当前发布树。`main` 的正式代码由 `current_data_study/` 经典审计和 `deep_models/` 预注册方法组成，独立于旧脚本并按顶刊级方法学标准设计。当前唯一正式深度分析入口是 [deep_models/top_journal_current_data.py](deep_models/top_journal_current_data.py)，完整协议与复现说明见 [deep_models/README.md](deep_models/README.md)。
+`original` 是不可变审计基线；初始 Python 算法和 MATLAB 提取脚本只在该分支及本地忽略副本中保留，不属于 `main` 当前发布树。`main` 的正式代码由 `current_data_study/` 经典审计和 `deep_models/` 预注册方法组成，独立于旧脚本并按预注册、泄漏安全且可审计的方法学标准设计。当前唯一正式深度分析入口是 [deep_models/source_cube_audit.py](deep_models/source_cube_audit.py)，完整协议与复现说明见 [deep_models/README.md](deep_models/README.md)。
 
 ## 正式分析状态
 
-- 预注册协议：[当前数据顶刊方法预注册](docs/当前数据顶刊方法预注册.md)
+- 预注册协议：[来源立方体预注册分析方案](docs/来源立方体预注册分析方案.md)
 - 正式运行：`executed_complete`，2 个互反方向 × 3 个模型 × 3 个固定优化种子，按运行清单共 18 个训练单元（含 SNV–LR 拟合）
 - 数据隔离：所有 `*-1` 来源立方体开发、所有 `*-2` 测试，以及完全反向测试；测试立方体不参与选择、早停或温度校准
 - 模型：SNV–LR 强基线、`spectral_only` 深度光谱消融、`fusion_net` 高效谱空融合网络
@@ -28,18 +28,18 @@
 
 完整双语摘要、条件性区间与图表见：
 
-- [正式后处理摘要](deep_models/outputs/top_journal_preregistered/postprocessing/summary.md)
-- [机器可读正式结果](deep_models/outputs/top_journal_preregistered/results.json)
-- [空间机制预声明判定](deep_models/outputs/top_journal_preregistered/spatial_mechanism_decision.json)
-- [主性能图](deep_models/outputs/top_journal_preregistered/postprocessing/figure_main_performance.pdf)
-- [反事实效应图](deep_models/outputs/top_journal_preregistered/postprocessing/figure_counterfactual_effects.pdf)
-- [集成混淆矩阵](deep_models/outputs/top_journal_preregistered/postprocessing/figure_ensemble_confusion_matrices.pdf)
-- [校准可靠性图](deep_models/outputs/top_journal_preregistered/postprocessing/figure_calibration_reliability.pdf)
+- [正式后处理摘要](deep_models/outputs/source_cube_preregistered_audit/postprocessing/summary.md)
+- [机器可读正式结果](deep_models/outputs/source_cube_preregistered_audit/results.json)
+- [空间机制预声明判定](deep_models/outputs/source_cube_preregistered_audit/spatial_mechanism_decision.json)
+- [主性能图](deep_models/outputs/source_cube_preregistered_audit/postprocessing/figure_main_performance.pdf)
+- [反事实效应图](deep_models/outputs/source_cube_preregistered_audit/postprocessing/figure_counterfactual_effects.pdf)
+- [集成混淆矩阵](deep_models/outputs/source_cube_preregistered_audit/postprocessing/figure_ensemble_confusion_matrices.pdf)
+- [校准可靠性图](deep_models/outputs/source_cube_preregistered_audit/postprocessing/figure_calibration_reliability.pdf)
 
 ## 论文与研究记录
 
 - [当前数据英文重写稿](paper/manuscript_current_data_reframed.md)
-- [正式执行与结果审计](docs/当前数据顶刊方法执行与结果审计.md)
+- [正式执行与结果审计](docs/来源立方体预注册分析执行与结果审计.md)
 - [研究审查与修订总账](docs/研究审查与修订总账.md)
 - [现有数据研究重构方案](docs/现有数据条件下的研究重构方案.md)
 - [数据采集协作需求书](docs/数据采集需求.md)

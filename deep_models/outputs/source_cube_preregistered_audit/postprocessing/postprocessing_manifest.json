@@ -1,10 +1,22 @@
 {
   "status": "executed_complete",
   "analysis_definition": "frozen_before_reading_results; no model or condition selection",
-  "input_directory": "D:\\projects\\Semen-Ziziphi-Spinosae\\deep_models\\outputs\\top_journal_preregistered",
+  "artifact_naming_migration": {
+    "applied_on": "2026-07-21",
+    "path_names_normalized_after_execution": true,
+    "original_execution_command_canonical_sha256": "6725b38f3244c1b23125eb3f80014bb79a7e3322d52f6db56a1c7ed752308d8c",
+    "training_or_postprocessing_rerun": false,
+    "expected_content_changes": [
+      "results.json",
+      "run_status.json",
+      "postprocessing/summary.md",
+      "postprocessing/postprocessing_manifest.json"
+    ]
+  },
+  "input_directory": "D:\\projects\\Semen-Ziziphi-Spinosae\\deep_models\\outputs\\source_cube_preregistered_audit",
   "input_file_sha256": {
-    "run_status.json": "205941fc31c856cfa77b34c0037b4f59edc16a8a3694cfba873adbc89e53e944",
-    "results.json": "1355cd65c5624fe428d7c2262ef6d9ead681ea8b891f6766563161650e0c0c08",
+    "run_status.json": "210b43738a0ebc662b1a7bf52a060e4fdb668ecc6f05643802b1bd5d777d19ea",
+    "results.json": "c272b7ae1f8c7c34ea562660fb0e0e923b9528ffff78937c05ebefad6bf90b60",
     "manifest.csv": "098b4c70c3b9572265e4868c2c5c1347c5f476b2423090ed2e061c8bd11c055f",
     "predictions.csv": "36a8d1ffd3226e29214402e60c3810f9c0d0b352c162b63a11ba2cdbee739bc9",
     "metrics.csv": "bb8a376e501d7b8162c3456566ac4a470b4fa2d1c4293819aa80c30fe4b6c153",
@@ -74,7 +86,7 @@
     "primary_sign_flip_null_distribution.csv": "39ec54bf417465e74a59c8c4d77bb6d6db70520f48f3730ee683529911517dab",
     "primary_sign_flip_test.json": "d273b493c61c8f7fcf142da0e696ba0b0240c5e95de749453f4f85257f995c75",
     "reliability_data.csv": "fda01e49bc3aa92b1c09fdc78cd54cb06714fda0b532b39a3d2b0958315ac881",
-    "summary.md": "266b9183b634c29f11e49471f544e3b42dd2b174808b901de4292338795f8b1e"
+    "summary.md": "b80c1be2397a05ee99e704bce2c5e87c54b82f34378ffc0aac6222077f2793bb"
   },
   "inference_scope": "conditional_on_the_16_archived_source_cubes_only"
 }

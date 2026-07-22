@@ -9,8 +9,8 @@ from pathlib import Path
 import numpy as np
 
 
-MODULE_PATH = Path(__file__).resolve().parents[1] / "top_journal_current_data.py"
-SPEC = importlib.util.spec_from_file_location("top_journal_current_data", MODULE_PATH)
+MODULE_PATH = Path(__file__).resolve().parents[1] / "source_cube_audit.py"
+SPEC = importlib.util.spec_from_file_location("source_cube_audit", MODULE_PATH)
 assert SPEC is not None and SPEC.loader is not None
 study = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = study

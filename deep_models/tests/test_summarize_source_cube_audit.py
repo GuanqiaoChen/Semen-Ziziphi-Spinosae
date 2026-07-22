@@ -9,8 +9,8 @@ from pathlib import Path
 import numpy as np
 
 
-MODULE_PATH = Path(__file__).resolve().parents[1] / "summarize_top_journal_results.py"
-SPEC = importlib.util.spec_from_file_location("summarize_top_journal_results", MODULE_PATH)
+MODULE_PATH = Path(__file__).resolve().parents[1] / "summarize_source_cube_audit.py"
+SPEC = importlib.util.spec_from_file_location("summarize_source_cube_audit", MODULE_PATH)
 assert SPEC is not None and SPEC.loader is not None
 summary = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = summary

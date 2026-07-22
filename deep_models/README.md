@@ -2,9 +2,9 @@
 
 ## 状态、入口与证据范围
 
-本目录的正式分析已于 2026-07-21 完整执行并标记为 `executed_complete`。当前唯一正式入口是 [top_journal_current_data.py](top_journal_current_data.py)，锁定后处理入口是 [summarize_top_journal_results.py](summarize_top_journal_results.py)，结果前冻结的方案见 [当前数据顶刊方法预注册](../docs/当前数据顶刊方法预注册.md)。
+本目录的正式分析已于 2026-07-21 完整执行并标记为 `executed_complete`。当前唯一正式入口是 [source_cube_audit.py](source_cube_audit.py)，锁定后处理入口是 [summarize_source_cube_audit.py](summarize_source_cube_audit.py)，结果前冻结的方案见 [来源立方体预注册分析方案](../docs/来源立方体预注册分析方案.md)。
 
-本次分析按顶刊级方法学审计规范实施：预先固定研究问题和估计量、来源立方体完全隔离、测试集不参与开发、强光谱基线、共享初始化的深度消融、同一锁定模型反事实、概率校准、正确层级的条件性不确定性以及可追溯逐样本产物。
+本次分析按预注册、泄漏安全且可审计的方法学规范实施：预先固定研究问题和估计量、来源立方体完全隔离、测试集不参与开发、强光谱基线、共享初始化的深度消融、同一锁定模型反事实、概率校准、正确层级的条件性不确定性以及可追溯逐样本产物。
 
 这些方法不能创造数据中不存在的生物学重复。当前数据只有 8 个存档商业样品标签、16 个来源立方体和 1,264 粒立方体内技术子样本；每个方向、每类只有 1 个测试来源立方体。因此结果是**当前配对来源立方体之间的闭集迁移诊断**，不是地理产地外部验证。
 
@@ -87,7 +87,7 @@
 
 融合网络的 \(\theta\) 比 `spectral_only` 只高 1.19 pp，区间跨零，而且两个方向差值一负一正；不能声称稳定优于深度光谱消融。它还比 SNV–LR 低 41.00 pp，区间完全低于零。当前最强性能基线是简洁的 SNV–LR，而不是深度融合模型。
 
-完整中英摘要见 [postprocessing/summary.md](outputs/top_journal_preregistered/postprocessing/summary.md)。
+完整中英摘要见 [postprocessing/summary.md](outputs/source_cube_preregistered_audit/postprocessing/summary.md)。
 
 ## 环境与复现
 
@@ -103,12 +103,12 @@ python -m venv .venv
 .venv\Scripts\python.exe -m pip check
 ```
 
-本次正式运行记录的确切命令为：
+仓库路径命名迁移后，当前等价复现命令为：
 
 ```powershell
-.venv\Scripts\python.exe deep_models\top_journal_current_data.py `
+.venv\Scripts\python.exe deep_models\source_cube_audit.py `
   --data-root data `
-  --output-dir deep_models\outputs\top_journal_preregistered `
+  --output-dir deep_models\outputs\source_cube_preregistered_audit `
   --models snv_lr spectral_only fusion_net `
   --seeds 42 2024 2025 `
   --device cuda:0 `
@@ -117,14 +117,14 @@ python -m venv .venv
 
 正式运行耗时 `1387.738` 秒，运行前工作树为干净的 `main`，代码提交为 `4bc191c2e9b8a809e866ccd15d96fea29378969d`。脚本要求输出目录不存在，**不要向现有正式目录重复执行**；独立复跑应使用新的空目录，并保留全部预声明单元。
 
-锁定后处理的确切命令为：
+当前仓库路径下的等价后处理命令为：
 
 ```powershell
-.venv\Scripts\python.exe deep_models\summarize_top_journal_results.py `
-  --input-dir deep_models\outputs\top_journal_preregistered
+.venv\Scripts\python.exe deep_models\summarize_source_cube_audit.py `
+  --input-dir deep_models\outputs\source_cube_preregistered_audit
 ```
 
-默认后处理目录是输入目录下的 `postprocessing`，同样拒绝覆盖已有目录。若对独立复跑后处理，应把 `--input-dir` 指向该完整新输出目录。
+默认后处理目录是输入目录下的 `postprocessing`，同样拒绝覆盖已有目录。若对独立复跑后处理，应把 `--input-dir` 指向该完整新输出目录。路径命名迁移未重跑训练或后处理；原始训练命令以规范化 SHA-256 `6725b38f3244c1b23125eb3f80014bb79a7e3322d52f6db56a1c7ed752308d8c` 留存，并可由运行提交恢复。
 
 发布检查点把波长元数据保存为普通 Python 列表，可使用 PyTorch 的安全默认模式加载：
 
@@ -136,25 +136,25 @@ checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
 
 ## 正式产物清单
 
-所有正式产物位于 [outputs/top_journal_preregistered](outputs/top_journal_preregistered/)：
+所有正式产物位于 [outputs/source_cube_preregistered_audit](outputs/source_cube_preregistered_audit/)：
 
-- [results.json](outputs/top_journal_preregistered/results.json) 与 [run_status.json](outputs/top_journal_preregistered/run_status.json)：执行状态、命令、环境、Git、协议、数据指纹、完整运行清单和限制；
-- [manifest.csv](outputs/top_journal_preregistered/manifest.csv)（1,264 行）、[wavelengths.csv](outputs/top_journal_preregistered/wavelengths.csv)、[splits.csv](outputs/top_journal_preregistered/splits.csv)：样本、实测波长和零交叉拆分；
-- [predictions.csv](outputs/top_journal_preregistered/predictions.csv)（45,504 行）与 [ensemble_predictions.csv](outputs/top_journal_preregistered/ensemble_predictions.csv)（15,168 行）：逐样本、逐条件原始/校准概率及三种子集成概率；
-- [metrics.csv](outputs/top_journal_preregistered/metrics.csv)（144 行）、[ensemble_metrics.csv](outputs/top_journal_preregistered/ensemble_metrics.csv)（48 行）、[cube_metrics.csv](outputs/top_journal_preregistered/cube_metrics.csv) 与 [ensemble_cube_metrics.csv](outputs/top_journal_preregistered/ensemble_cube_metrics.csv)：运行、集成和来源立方体层级指标；
-- [primary_estimands.csv](outputs/top_journal_preregistered/primary_estimands.csv) 与 [spatial_mechanism_decision.json](outputs/top_journal_preregistered/spatial_mechanism_decision.json)：主要 \(\theta\) 与冻结门槛判定；
-- [model_selection.csv](outputs/top_journal_preregistered/model_selection.csv)、[development_validation_calibration.csv](outputs/top_journal_preregistered/development_validation_calibration.csv) 和 [training_history.csv](outputs/top_journal_preregistered/training_history.csv)：开发内选择、温度与训练轨迹；
-- [counterfactual_pairs.csv](outputs/top_journal_preregistered/counterfactual_pairs.csv) 与 [ensemble_counterfactual_pairs.csv](outputs/top_journal_preregistered/ensemble_counterfactual_pairs.csv)：逐种子和集成的配对反事实；
+- [results.json](outputs/source_cube_preregistered_audit/results.json) 与 [run_status.json](outputs/source_cube_preregistered_audit/run_status.json)：执行状态、命令、环境、Git、协议、数据指纹、完整运行清单和限制；
+- [manifest.csv](outputs/source_cube_preregistered_audit/manifest.csv)（1,264 行）、[wavelengths.csv](outputs/source_cube_preregistered_audit/wavelengths.csv)、[splits.csv](outputs/source_cube_preregistered_audit/splits.csv)：样本、实测波长和零交叉拆分；
+- [predictions.csv](outputs/source_cube_preregistered_audit/predictions.csv)（45,504 行）与 [ensemble_predictions.csv](outputs/source_cube_preregistered_audit/ensemble_predictions.csv)（15,168 行）：逐样本、逐条件原始/校准概率及三种子集成概率；
+- [metrics.csv](outputs/source_cube_preregistered_audit/metrics.csv)（144 行）、[ensemble_metrics.csv](outputs/source_cube_preregistered_audit/ensemble_metrics.csv)（48 行）、[cube_metrics.csv](outputs/source_cube_preregistered_audit/cube_metrics.csv) 与 [ensemble_cube_metrics.csv](outputs/source_cube_preregistered_audit/ensemble_cube_metrics.csv)：运行、集成和来源立方体层级指标；
+- [primary_estimands.csv](outputs/source_cube_preregistered_audit/primary_estimands.csv) 与 [spatial_mechanism_decision.json](outputs/source_cube_preregistered_audit/spatial_mechanism_decision.json)：主要 \(\theta\) 与冻结门槛判定；
+- [model_selection.csv](outputs/source_cube_preregistered_audit/model_selection.csv)、[development_validation_calibration.csv](outputs/source_cube_preregistered_audit/development_validation_calibration.csv) 和 [training_history.csv](outputs/source_cube_preregistered_audit/training_history.csv)：开发内选择、温度与训练轨迹；
+- [counterfactual_pairs.csv](outputs/source_cube_preregistered_audit/counterfactual_pairs.csv) 与 [ensemble_counterfactual_pairs.csv](outputs/source_cube_preregistered_audit/ensemble_counterfactual_pairs.csv)：逐种子和集成的配对反事实；
 - 12 个可由 `weights_only=True` 安全加载的神经 checkpoint（2 个方向 × 2 个神经模型 × 3 个种子，`*.pt`）；
-- [MAT/CSV 一致性 JSON](outputs/top_journal_preregistered/mat_csv_mean_consistency.json) 与逐样本 CSV：表示完整性审计。
+- [MAT/CSV 一致性 JSON](outputs/source_cube_preregistered_audit/mat_csv_mean_consistency.json) 与逐样本 CSV：表示完整性审计。
 
-锁定后处理位于 [postprocessing](outputs/top_journal_preregistered/postprocessing/)：
+锁定后处理位于 [postprocessing](outputs/source_cube_preregistered_audit/postprocessing/)：
 
-- [summary.md](outputs/top_journal_preregistered/postprocessing/summary.md)：中英双语审计摘要；
-- [bootstrap_theta_intervals.csv](outputs/top_journal_preregistered/postprocessing/bootstrap_theta_intervals.csv)、[bootstrap_effect_intervals.csv](outputs/top_journal_preregistered/postprocessing/bootstrap_effect_intervals.csv) 与 [bootstrap_label_pair_indices.csv](outputs/top_journal_preregistered/postprocessing/bootstrap_label_pair_indices.csv)：条件性区间及共享重采样矩阵；
-- [primary_sign_flip_test.json](outputs/top_journal_preregistered/postprocessing/primary_sign_flip_test.json)、逐标签效应和完整 256 个符号分配：主要精确检验；
-- [postprocessing_manifest.json](outputs/top_journal_preregistered/postprocessing/postprocessing_manifest.json)：输入/输出 SHA-256、锁定常数和推断范围；
-- [主性能图](outputs/top_journal_preregistered/postprocessing/figure_main_performance.pdf)、[反事实效应图](outputs/top_journal_preregistered/postprocessing/figure_counterfactual_effects.pdf)、[集成混淆矩阵](outputs/top_journal_preregistered/postprocessing/figure_ensemble_confusion_matrices.pdf) 与 [校准可靠性图](outputs/top_journal_preregistered/postprocessing/figure_calibration_reliability.pdf)，均同时提供 PNG 和矢量 PDF。
+- [summary.md](outputs/source_cube_preregistered_audit/postprocessing/summary.md)：中英双语审计摘要；
+- [bootstrap_theta_intervals.csv](outputs/source_cube_preregistered_audit/postprocessing/bootstrap_theta_intervals.csv)、[bootstrap_effect_intervals.csv](outputs/source_cube_preregistered_audit/postprocessing/bootstrap_effect_intervals.csv) 与 [bootstrap_label_pair_indices.csv](outputs/source_cube_preregistered_audit/postprocessing/bootstrap_label_pair_indices.csv)：条件性区间及共享重采样矩阵；
+- [primary_sign_flip_test.json](outputs/source_cube_preregistered_audit/postprocessing/primary_sign_flip_test.json)、逐标签效应和完整 256 个符号分配：主要精确检验；
+- [postprocessing_manifest.json](outputs/source_cube_preregistered_audit/postprocessing/postprocessing_manifest.json)：输入/输出 SHA-256、锁定常数和推断范围；
+- [主性能图](outputs/source_cube_preregistered_audit/postprocessing/figure_main_performance.pdf)、[反事实效应图](outputs/source_cube_preregistered_audit/postprocessing/figure_counterfactual_effects.pdf)、[集成混淆矩阵](outputs/source_cube_preregistered_audit/postprocessing/figure_ensemble_confusion_matrices.pdf) 与 [校准可靠性图](outputs/source_cube_preregistered_audit/postprocessing/figure_calibration_reliability.pdf)，均同时提供 PNG 和矢量 PDF。
 
 ## 复现审计要点
 

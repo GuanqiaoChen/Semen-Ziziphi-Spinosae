@@ -1282,7 +1282,7 @@ def _resolve_device(requested: str):
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Current-data source-cube-isolated top-journal audit")
+    parser = argparse.ArgumentParser(description="Current-data source-cube-isolated preregistered audit")
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, default=None)
     parser.add_argument("--models", nargs="+", choices=MODEL_CHOICES, default=list(MODEL_CHOICES))
@@ -1648,7 +1648,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     output_dir = (
         args.output_dir.resolve()
         if args.output_dir is not None
-        else Path(__file__).resolve().parent / "outputs" / f"top_journal_{timestamp}"
+        else Path(__file__).resolve().parent / "outputs" / f"source_cube_audit_{timestamp}"
     )
     if output_dir.exists():
         raise FileExistsError(f"Refusing to overwrite or mix output directory: {output_dir}")
