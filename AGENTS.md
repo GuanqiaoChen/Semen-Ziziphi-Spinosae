@@ -21,6 +21,21 @@ executed results, and pending analyses.
 
 ## Branch and research-standard policy
 
+The sole scientific objective of `main` is geographical-origin traceability of
+Semen Ziziphi Spinosae from hyperspectral data. Every model, feature, validation
+protocol, falsification analysis, result, figure, and manuscript claim must
+serve that objective. Acquisition-domain auditing is a supporting robustness
+tool, not a substitute research objective.
+
+For the current dataset, the research team has authorized deterministic
+division of seeds from each origin into multiple constructed independent
+batches. Treat these constructed batches as the primary grouped analysis units:
+define them without outcome-dependent optimization, keep every constructed
+batch wholly inside one development, validation, or test partition, and record
+the assignment for exact reproduction. Retain whole-source-image transfer as a
+secondary stress test, but do not let it replace the primary origin-traceability
+analysis.
+
 Treat `original` as an immutable audit baseline. Development on `main` is not
 constrained by the architecture, package choices, interfaces, hyperparameters,
 or implementation details of the legacy scripts. Reuse legacy code only when
