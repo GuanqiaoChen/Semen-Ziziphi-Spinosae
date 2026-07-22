@@ -1,0 +1,71 @@
+{
+  "absolute_difference": 1.712519015484304e-13,
+  "absolute_tolerance": 1e-08,
+  "assertion_passed": true,
+  "deployment_temperature": 0.39101246842682874,
+  "deployment_temperature_protocol": "eight_fold_leave_one_development_batch_out_scores",
+  "frozen_expected_temperature": 0.391012468427,
+  "locked_access": {
+    "development_csv_byte_hash_reads": 2024,
+    "development_csv_hash_passes": 2,
+    "development_csv_numeric_reads": 1012,
+    "development_mat_byte_reads": 0,
+    "development_mat_numeric_reads": 0,
+    "development_samples": 1012,
+    "enforcement": [
+      "discover_manifest(hash_files=False)",
+      "load_csv_split(split='development')",
+      "hash_development_csv_records prevalidates every record before opening a file"
+    ],
+    "locked_byte_reads": 0,
+    "locked_csv_hashes": 0,
+    "locked_file_metadata_entries_enumerated": 504,
+    "locked_mat_hashes": 0,
+    "locked_numeric_reads": 0,
+    "locked_paths_enumerated": 252
+  },
+  "log_temperature_bounds": [
+    -4.0,
+    4.0
+  ],
+  "model": "sg1_rbf_svm_group_temperature",
+  "outer_fold_temperatures": [
+    {
+      "held_out_batch": 0,
+      "temperature": 0.4228057378189636
+    },
+    {
+      "held_out_batch": 1,
+      "temperature": 0.4261763647627227
+    },
+    {
+      "held_out_batch": 2,
+      "temperature": 0.4187306769080467
+    },
+    {
+      "held_out_batch": 3,
+      "temperature": 0.4200886680901232
+    },
+    {
+      "held_out_batch": 4,
+      "temperature": 0.37811934175778084
+    },
+    {
+      "held_out_batch": 5,
+      "temperature": 0.3925406496386369
+    },
+    {
+      "held_out_batch": 6,
+      "temperature": 0.40815772490224017
+    },
+    {
+      "held_out_batch": 7,
+      "temperature": 0.4156996618435958
+    }
+  ],
+  "outer_performance_protocol": "outer batch excluded from all inner OOF temperature fits",
+  "probability_method": "softmax_of_ovr_decision_scores",
+  "status": "newly_executed_development_only",
+  "svm_internal_platt_probability": false,
+  "temperature_objective": "multiclass_negative_log_likelihood"
+}

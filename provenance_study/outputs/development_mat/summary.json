@@ -1,0 +1,279 @@
+{
+  "status": "newly_executed_development_only",
+  "scientific_objective": "hyperspectral_geographical_origin_traceability_of_semen_ziziphi_spinosae",
+  "started_utc": "2026-07-22T05:31:41.146406+00:00",
+  "completed_utc": "2026-07-22T05:35:21.882231+00:00",
+  "duration_seconds": 220.74640699999873,
+  "mat_feature_read_seconds": 8.645229700006894,
+  "analysis_units": "deterministically_constructed_batches",
+  "development_batches": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "locked_batches": [
+    8,
+    9
+  ],
+  "structural_manifest_sha256": "db801b6d899669f14394315e48767c3fc976d5830a9d26284533e330bac1c095",
+  "structural_assignment_fingerprint_sha256": "43b0daabd384ebd5d2e3a42e7125211e96496a67c05c4263473394ef2a7b0c19",
+  "full_manifest_content_hashing_performed": false,
+  "feature_dimensions": {
+    "morphology": 5,
+    "foreground_std": 392,
+    "foreground_iqr": 392,
+    "radial_inner_minus_outer": 392,
+    "mat_all": 1181,
+    "sg1_plus_mat_all_early": 1573
+  },
+  "feature_definitions": {
+    "foreground_std": "per-band sample SD across mask foreground pixels (ddof=1)",
+    "foreground_iqr": "per-band foreground P75 minus P25",
+    "radial_inner_minus_outer": "per-band inner mean minus outer mean; inner distance-transform values exceed the within-mask median",
+    "morphology": [
+      "area_fraction",
+      "boundary_pixels_over_sqrt_area",
+      "minor_major_axis_ratio",
+      "bounding_box_extent",
+      "radial_distance_cv"
+    ],
+    "mat_all": "foreground_std + foreground_iqr + radial_inner_minus_outer + morphology",
+    "sg1_plus_mat_all_early": "SG(15,2,1) CSV mean spectrum + mat_all"
+  },
+  "configuration": {
+    "analysis_seed": 20260721,
+    "outer_validation": "eight_fold_leave_one_constructed_development_batch_out",
+    "development_batches": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "locked_batches": [
+      8,
+      9
+    ],
+    "sg1": {
+      "window_length": 15,
+      "polyorder": 2,
+      "derivative": 1,
+      "axis": 1,
+      "mode": "interp"
+    },
+    "scaling": {
+      "lda_lr_svm": "StandardScaler fitted on each outer-training partition only",
+      "extra_trees": "none"
+    },
+    "view_models": {
+      "shrinkage_lda": {
+        "solver": "lsqr",
+        "shrinkage": "auto"
+      },
+      "logistic_regression": {
+        "C": 1.0,
+        "solver": "lbfgs",
+        "penalty": "l2",
+        "max_iter": 4000,
+        "tol": 0.0001,
+        "class_weight": null,
+        "random_state": 20260721
+      },
+      "rbf_svm": {
+        "C": 10.0,
+        "kernel": "rbf",
+        "gamma": "scale",
+        "probability": true,
+        "probability_calibration": "libsvm internal Platt scaling inside each outer-training partition",
+        "random_state": 20260721
+      },
+      "extra_trees": {
+        "n_estimators": 500,
+        "max_features": "sqrt",
+        "min_samples_split": 2,
+        "min_samples_leaf": 2,
+        "max_depth": null,
+        "class_weight": "balanced",
+        "n_jobs": -1,
+        "random_state": 20260721
+      }
+    },
+    "fixed_spectral_reference": {
+      "members": [
+        "sg1_spectral_shrinkage_lda",
+        "sg1_spectral_logistic_regression",
+        "sg1_spectral_rbf_svm_group_temperature"
+      ],
+      "weights": [
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
+      ],
+      "svm_probability_calibration": "strictly nested grouped temperature scaling",
+      "logistic_regression_max_iter": 5000
+    },
+    "late_fusion": {
+      "spectral_weights": [
+        0.25,
+        0.5,
+        0.75
+      ],
+      "mat_weight": "one_minus_spectral_weight",
+      "selection_data": "same development OOF predictions",
+      "role": "exploratory_only_not_primary_model_selection"
+    }
+  },
+  "access_audit": {
+    "manifest_discovery": "discover_manifest(hash_files=False)",
+    "development_samples": 1012,
+    "development_csv_numeric_reads": 1012,
+    "development_mat_numeric_reads": 1012,
+    "locked_paths_enumerated": 252,
+    "locked_csv_numeric_reads": 0,
+    "locked_mat_numeric_reads": 0,
+    "locked_byte_reads": 0,
+    "locked_csv_hashes": 0,
+    "locked_mat_hashes": 0,
+    "collection_preflight_before_mat_io": true,
+    "single_record_guard_before_hdf5_io": true
+  },
+  "svm_spectral_temperature_calibration": {
+    "method": "strictly_nested_grouped_temperature_scaling",
+    "outer_fold_temperatures": [
+      {
+        "held_out_batch": 0,
+        "temperature": 0.4228057378189636
+      },
+      {
+        "held_out_batch": 1,
+        "temperature": 0.4261763647627227
+      },
+      {
+        "held_out_batch": 2,
+        "temperature": 0.4187306769080467
+      },
+      {
+        "held_out_batch": 3,
+        "temperature": 0.4200886680901232
+      },
+      {
+        "held_out_batch": 4,
+        "temperature": 0.37811934175778084
+      },
+      {
+        "held_out_batch": 5,
+        "temperature": 0.3925406496386369
+      },
+      {
+        "held_out_batch": 6,
+        "temperature": 0.40815772490224017
+      },
+      {
+        "held_out_batch": 7,
+        "temperature": 0.4156996618435958
+      }
+    ],
+    "deployment_temperature": 0.39101246842682874
+  },
+  "fixed_spectral_ensemble": {
+    "model_id": "sg1_spectral_probability_ensemble",
+    "role": "fixed_spectral_reference",
+    "view": "sg1_mean_spectrum",
+    "classifier": "equal_probability_ensemble",
+    "n": 1012,
+    "accuracy": 0.9822134387351779,
+    "balanced_accuracy": 0.9824133646514162,
+    "macro_f1": 0.9823958626309626,
+    "negative_log_likelihood": 0.1054694419521023,
+    "multiclass_brier_score": 0.04278948892702784,
+    "expected_calibration_error": 0.04399102889860949,
+    "equal_constructed_batch_accuracy": 0.9822053493313336,
+    "fold_balanced_accuracy_min": 0.9692095588235294,
+    "fold_balanced_accuracy_max": 0.9921875,
+    "fold_balanced_accuracy_mean": 0.9824547006302522,
+    "fold_balanced_accuracy_sd": 0.008755156203003003,
+    "errors": 18,
+    "same_oof_selected": 0
+  },
+  "best_mat_only": {
+    "model_id": "mat_all__shrinkage_lda",
+    "role": "development_mat_view_candidate",
+    "view": "mat_all",
+    "classifier": "shrinkage_lda",
+    "n": 1012,
+    "accuracy": 0.7035573122529645,
+    "balanced_accuracy": 0.7080546194172114,
+    "macro_f1": 0.7042849969860714,
+    "negative_log_likelihood": 0.8152946067398189,
+    "multiclass_brier_score": 0.40918029629359187,
+    "expected_calibration_error": 0.04954809156060006,
+    "equal_constructed_batch_accuracy": 0.7036073615798025,
+    "fold_balanced_accuracy_min": 0.6790966386554622,
+    "fold_balanced_accuracy_max": 0.7522977941176471,
+    "fold_balanced_accuracy_mean": 0.7082994555995474,
+    "fold_balanced_accuracy_sd": 0.023901076264170627,
+    "errors": 300,
+    "same_oof_selected": 0
+  },
+  "best_early_fusion": {
+    "model_id": "sg1_plus_mat_all_early__shrinkage_lda",
+    "role": "development_mat_view_candidate",
+    "view": "sg1_plus_mat_all_early",
+    "classifier": "shrinkage_lda",
+    "n": 1012,
+    "accuracy": 0.9792490118577075,
+    "balanced_accuracy": 0.9796645220588236,
+    "macro_f1": 0.9796708221242221,
+    "negative_log_likelihood": 0.09065366140247312,
+    "multiclass_brier_score": 0.030302763658496455,
+    "expected_calibration_error": 0.008913325297528689,
+    "equal_constructed_batch_accuracy": 0.9792604049493814,
+    "fold_balanced_accuracy_min": 0.9613970588235294,
+    "fold_balanced_accuracy_max": 0.9921875,
+    "fold_balanced_accuracy_mean": 0.9796645220588236,
+    "fold_balanced_accuracy_sd": 0.009164055311314194,
+    "errors": 21,
+    "same_oof_selected": 0
+  },
+  "best_same_oof_late_fusion": {
+    "model_id": "late_w0.75__foreground_iqr__extra_trees",
+    "role": "same_oof_late_fusion_exploratory_only",
+    "view": "foreground_iqr",
+    "classifier": "spectral_ensemble_plus_extra_trees",
+    "n": 1012,
+    "accuracy": 0.9822134387351779,
+    "balanced_accuracy": 0.9824133646514162,
+    "macro_f1": 0.9823958626309626,
+    "negative_log_likelihood": 0.30473400748150675,
+    "multiclass_brier_score": 0.09946268878607005,
+    "expected_calibration_error": 0.21933646068106483,
+    "equal_constructed_batch_accuracy": 0.9822053493313336,
+    "fold_balanced_accuracy_min": 0.9692095588235294,
+    "fold_balanced_accuracy_max": 0.9921875,
+    "fold_balanced_accuracy_mean": 0.9824547006302522,
+    "fold_balanced_accuracy_sd": 0.008755156203003003,
+    "errors": 18,
+    "same_oof_selected": 1,
+    "late_spectral_weight": 0.75,
+    "late_mat_weight": 0.25
+  },
+  "best_same_oof_late_fusion_warning": "Selected across all MAT-only candidates and weights on the same development OOF rows; not an unbiased model comparison and not eligible to replace the fixed primary predictor.",
+  "balanced_accuracy_delta_early_minus_spectral": -0.0027488425925925597,
+  "balanced_accuracy_delta_late_minus_spectral_descriptive_only": 0.0,
+  "mat_early_exceeded_fixed_spectral_ensemble": false,
+  "primary_conclusion": "预先定义的 MAT 早期融合未超过固定光谱组合，当前没有可靠的 MAT 增益。",
+  "limitations": [
+    "constructed batches share the same two source images per origin",
+    "MAT views may encode segmentation, pose, crop, or illumination shortcuts",
+    "same-OOF late-fusion selection is optimistically selected",
+    "no unseen physical lot, year, farm, device, or external site is available"
+  ]
+}

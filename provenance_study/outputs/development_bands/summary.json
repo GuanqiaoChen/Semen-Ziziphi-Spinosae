@@ -1,0 +1,177 @@
+{
+  "created_utc": "2026-07-22T05:42:15.932274+00:00",
+  "scientific_objective": "hyperspectral geographical-origin traceability",
+  "analysis_scope": "constructed_batches_0_to_7_development_only",
+  "status": "exploratory_negative_result_not_in_primary_method",
+  "selection_bias_warning": "The largest value among 132 candidates was selected on the same development OOF comparison and is optimistic; it is not confirmatory evidence.",
+  "protocol": {
+    "analysis_seed": 20260721,
+    "sg": {
+      "window_length": 15,
+      "polyorder": 2,
+      "derivative": 1,
+      "mode": "interp"
+    },
+    "outer_folds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "inner_rankings_per_outer_fold": 7,
+    "scorers": [
+      "ANOVA",
+      "LDAcoef"
+    ],
+    "classifiers": [
+      "LDA",
+      "LR"
+    ],
+    "selector_count": 66,
+    "candidate_count": 132,
+    "late_ensemble": "0.5*candidate_probability + 0.5*full_spectrum_LDA_probability"
+  },
+  "data_access": {
+    "manifest_discovery_hash_files": false,
+    "loaded_constructed_batches": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "locked_constructed_batches": [
+      8,
+      9
+    ],
+    "locked_numeric_reads": 0,
+    "locked_byte_reads": 0,
+    "locked_hash_reads": 0,
+    "mat_numeric_reads": 0
+  },
+  "data": {
+    "n_samples": 1012,
+    "n_bands": 392,
+    "class_counts": {
+      "0": 128,
+      "1": 128,
+      "2": 128,
+      "3": 128,
+      "4": 136,
+      "5": 128,
+      "6": 128,
+      "7": 108
+    },
+    "batch_counts": {
+      "0": 127,
+      "1": 127,
+      "2": 127,
+      "3": 127,
+      "4": 126,
+      "5": 126,
+      "6": 126,
+      "7": 126
+    },
+    "manifest_structural_fingerprint_sha256": "43b0daabd384ebd5d2e3a42e7125211e96496a67c05c4263473394ef2a7b0c19",
+    "development_csv_fingerprint_sha256": "a65ed1d333f1e858f91528ef023c0fee1a35790a38a8d5340c89874371d486c2"
+  },
+  "full_spectrum_sg1_lda": {
+    "accuracy": 0.9752964426877471,
+    "balanced_accuracy": 0.9758157169117647,
+    "macro_f1": 0.9758497182933248,
+    "log_loss": 0.10443198175348208,
+    "fold_balanced_accuracy_min": 0.9613970588235294,
+    "fold_balanced_accuracy_max": 0.9921875,
+    "fold_balanced_accuracy_mean": 0.9758157169117647,
+    "fold_balanced_accuracy_sd": 0.011189472071604192,
+    "fold_balanced_accuracies": [
+      0.9848345588235294,
+      0.9921875,
+      0.9618566176470589,
+      0.96875,
+      0.9765625,
+      0.9765625,
+      0.9613970588235294,
+      0.984375
+    ]
+  },
+  "best_selected_candidate": {
+    "candidate_id": "LDAcoef:fixed:128:LDA",
+    "selector_id": "LDAcoef:fixed:128",
+    "scorer": "LDAcoef",
+    "selection_mode": "fixed",
+    "selection_amount": 128,
+    "consensus_threshold": "",
+    "classifier": "LDA",
+    "balanced_accuracy": 0.9670266544117647,
+    "accuracy": 0.9664031620553359,
+    "macro_f1": 0.9672088821147777,
+    "log_loss": 0.12312077877576687,
+    "fold_balanced_accuracy_min": 0.9379595588235294,
+    "fold_balanced_accuracy_max": 0.9921875,
+    "fold_balanced_accuracy_sd": 0.015911528038002498,
+    "selected_band_count_min": 128,
+    "selected_band_count_median": 128.0,
+    "selected_band_count_max": 128,
+    "mean_pairwise_selection_jaccard": 0.7820084107937401,
+    "minimum_pairwise_selection_jaccard": 0.7297297297297297,
+    "delta_vs_full_spectrum_lda_pp": -0.87890625,
+    "ensemble_with_full_lda_balanced_accuracy": 0.9767922794117647,
+    "ensemble_with_full_lda_macro_f1": 0.9768466200826348,
+    "ensemble_with_full_lda_log_loss": 0.10928314339847534,
+    "ensemble_fold_balanced_accuracy_min": 0.9613970588235294,
+    "ensemble_fold_balanced_accuracy_max": 0.9921875,
+    "ensemble_delta_vs_full_spectrum_lda_pp": 0.09765625,
+    "comparison_scope": "same_development_oof_exploratory",
+    "promotion_eligible": false
+  },
+  "best_equal_ensemble_with_full_lda": {
+    "candidate_id": "LDAcoef:fixed:128:LR",
+    "selector_id": "LDAcoef:fixed:128",
+    "scorer": "LDAcoef",
+    "selection_mode": "fixed",
+    "selection_amount": 128,
+    "consensus_threshold": "",
+    "classifier": "LR",
+    "balanced_accuracy": 0.9589673543028323,
+    "accuracy": 0.958498023715415,
+    "macro_f1": 0.9589684471947516,
+    "log_loss": 0.16779214211926116,
+    "fold_balanced_accuracy_min": 0.9379595588235294,
+    "fold_balanced_accuracy_max": 0.984375,
+    "fold_balanced_accuracy_sd": 0.017248914956491973,
+    "selected_band_count_min": 128,
+    "selected_band_count_median": 128.0,
+    "selected_band_count_max": 128,
+    "mean_pairwise_selection_jaccard": 0.7820084107937401,
+    "minimum_pairwise_selection_jaccard": 0.7297297297297297,
+    "delta_vs_full_spectrum_lda_pp": -1.684836260893241,
+    "ensemble_with_full_lda_balanced_accuracy": 0.9777113970588236,
+    "ensemble_with_full_lda_macro_f1": 0.9777704348107614,
+    "ensemble_with_full_lda_log_loss": 0.1189250508634613,
+    "ensemble_fold_balanced_accuracy_min": 0.9535845588235294,
+    "ensemble_fold_balanced_accuracy_max": 0.9921875,
+    "ensemble_delta_vs_full_spectrum_lda_pp": 0.18956801470588758,
+    "comparison_scope": "same_development_oof_exploratory",
+    "promotion_eligible": false
+  },
+  "disposition": {
+    "enter_primary_method": false,
+    "use": "reported development ablation and feature-stability audit only",
+    "reason": "The route was screened over 132 same-OOF candidates and did not provide independent evidence sufficient to change the frozen primary method."
+  },
+  "environment": {
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "numpy": "2.4.4",
+    "scipy": "1.17.1",
+    "scikit_learn": "1.8.0"
+  }
+}
