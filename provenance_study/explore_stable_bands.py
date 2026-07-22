@@ -39,7 +39,7 @@ from scipy.signal import savgol_filter
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.feature_selection import f_classif
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, log_loss
+from sklearn.metrics import balanced_accuracy_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
@@ -56,6 +56,7 @@ from provenance_study.core import (  # noqa: E402
     SpectralDataset,
     discover_manifest,
     load_development_csv,
+    multiclass_metrics,
 )
 
 
@@ -378,6 +379,7 @@ def _probability_metrics(
     classes: np.ndarray,
 ) -> dict[str, Any]:
     predicted = classes[np.argmax(probabilities, axis=1)]
+    shared_metrics = multiclass_metrics(y, probabilities, classes=classes)
     fold_scores = [
         float(
             balanced_accuracy_score(
@@ -387,12 +389,14 @@ def _probability_metrics(
         for batch in DEVELOPMENT_BATCHES
     ]
     return {
-        "accuracy": float(accuracy_score(y, predicted)),
-        "balanced_accuracy": float(balanced_accuracy_score(y, predicted)),
-        "macro_f1": float(f1_score(y, predicted, average="macro", zero_division=0)),
-        "log_loss": float(
-            log_loss(y, np.clip(probabilities, 1e-12, 1.0), labels=classes)
-        ),
+        "accuracy": float(shared_metrics["accuracy"]),
+        "balanced_accuracy": float(shared_metrics["balanced_accuracy"]),
+        "macro_f1": float(shared_metrics["macro_f1"]),
+        # Keep the artifact column name for compatibility, but compute the value
+        # with the single project-wide NLL definition in ``core.multiclass_metrics``.
+        # In particular, its 1e-15 true-class probability floor must not drift to
+        # sklearn's version-dependent epsilon or the former local 1e-12 floor.
+        "log_loss": float(shared_metrics["negative_log_likelihood"]),
         "fold_balanced_accuracy_min": float(min(fold_scores)),
         "fold_balanced_accuracy_max": float(max(fold_scores)),
         "fold_balanced_accuracy_mean": float(np.mean(fold_scores)),

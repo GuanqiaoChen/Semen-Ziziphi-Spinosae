@@ -15,15 +15,21 @@ from provenance_study.core import (
     LockedDataAccessError,
     SampleRecord,
     SpectralDataset,
+    build_sg15_shrinkage_lda,
+    grouped_oof_probabilities,
+    multiclass_metrics,
 )
 from provenance_study.explore_stable_bands import (
     EXPECTED_CANDIDATE_COUNT,
     EXPECTED_SELECTOR_COUNT,
     SelectionDefinition,
+    _baseline_oof,
+    _probability_metrics,
     evaluate_stable_band_candidates,
     inner_rank_matrix,
     run_exploration,
     selection_definitions,
+    sg_first_derivative,
     write_artifacts,
 )
 
@@ -113,6 +119,40 @@ class StableBandProtocolTests(unittest.TestCase):
                 changed_X, changed_y, groups, outer_batch=outer, scorer=scorer
             )
             np.testing.assert_array_equal(original, changed)
+
+    def test_nll_uses_the_shared_project_probability_floor(self) -> None:
+        y = np.tile(np.arange(8), 8)
+        groups = np.repeat(np.arange(8), 8)
+        probabilities = np.full((64, 8), 0.01 / 7.0)
+        probabilities[np.arange(64), y] = 0.99
+        probabilities[0] = np.asarray(
+            [1e-18, 1.0 - 1e-18, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        )
+        shared = multiclass_metrics(y, probabilities, classes=np.arange(8))
+        stable = _probability_metrics(
+            y, groups, probabilities, classes=np.arange(8)
+        )
+        self.assertEqual(stable["log_loss"], shared["negative_log_likelihood"])
+        nll_with_incorrect_floor = float(
+            -np.log(
+                np.clip(probabilities[np.arange(y.size), y], 1e-12, 1.0)
+            ).mean()
+        )
+        self.assertGreater(stable["log_loss"], nll_with_incorrect_floor)
+
+    def test_full_spectrum_baseline_probabilities_match_the_formal_pipeline(self) -> None:
+        X, y, groups, _ = _synthetic_arrays()
+        classes = np.arange(8)
+        stable_probabilities = _baseline_oof(
+            sg_first_derivative(X), y, groups, classes
+        )
+        formal = grouped_oof_probabilities(
+            build_sg15_shrinkage_lda(), X, y, groups
+        )
+        np.testing.assert_array_equal(formal.held_out_batch, groups)
+        np.testing.assert_allclose(
+            stable_probabilities, formal.probabilities, rtol=1e-12, atol=1e-14
+        )
 
     def test_locked_batch_guard_runs_before_sg_or_model_fitting(self) -> None:
         X, y, groups, wavelengths = _synthetic_arrays()
