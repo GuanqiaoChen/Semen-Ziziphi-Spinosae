@@ -46,6 +46,16 @@ def _synthetic_grouped_spectra() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 
 
 class ArchitectureAndPredictionTests(unittest.TestCase):
+    @unittest.skipUnless(torch.cuda.is_available(), "CUDA regression requires a CUDA device")
+    def test_unindexed_cuda_request_matches_concrete_model_device(self):
+        model = ResidualSpectralCNN().to("cuda")
+        values = np.zeros((2, 392), dtype=np.float32)
+        probabilities = predict_standardized_probabilities(
+            model, values, batch_size=2, device="cuda"
+        )
+        self.assertEqual(probabilities.shape, (2, 8))
+        np.testing.assert_allclose(probabilities.sum(axis=1), 1.0, atol=1e-7)
+
     def test_parameter_count_forward_and_probabilities(self) -> None:
         model = ResidualSpectralCNN()
         self.assertEqual(count_trainable_parameters(model), CNN_PARAMETER_COUNT)

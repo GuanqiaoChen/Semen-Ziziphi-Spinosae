@@ -245,6 +245,13 @@ def _resolve_device(device: str | torch.device | None) -> torch.device:
     resolved = torch.device(device)
     if resolved.type == "cuda" and not torch.cuda.is_available():
         raise ValueError("CUDA was requested but is not available")
+    # ``torch.device('cuda')`` and a module's concrete ``cuda:0`` device refer
+    # to the same accelerator, but PyTorch device equality treats them as
+    # distinct objects.  Canonicalize an unspecified CUDA index before the
+    # strict model/input device check so the public ``--device cuda`` CLI works
+    # without weakening protection against a genuine cross-device mismatch.
+    if resolved.type == "cuda" and resolved.index is None:
+        resolved = torch.device("cuda", torch.cuda.current_device())
     return resolved
 
 
