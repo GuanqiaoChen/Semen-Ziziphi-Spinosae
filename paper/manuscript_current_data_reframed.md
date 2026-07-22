@@ -6,7 +6,7 @@ Ziying Wang<sup>a</sup>, Guanqiao Chen<sup>b</sup>, Jiale Wei<sup>c</sup>, Xumei
 
 <sup>a</sup> School of Pharmacy, Xi'an Jiaotong University, Xi'an 710049, China  
 <sup>b</sup> Tandon School of Engineering, New York University, New York, NY 11201, USA  
-<sup>c</sup> Affiliation not available in the audited project materials; the authors must supply and verify it before submission.  
+<sup>c</sup> School of Artificial Intelligence, The Chinese University of Hong Kong, Shenzhen, Guangdong 518172, China
 <sup>*</sup> Corresponding author: wangxumei@mail.xjtu.edu.cn
 
 ## Highlights
