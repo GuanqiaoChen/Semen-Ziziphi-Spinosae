@@ -1,0 +1,3 @@
+﻿feature,cross_cube_balanced_accuracy,cross_cube_negative_log_likelihood
+sg1_reference,0.9365234375,0.2391310737294509
+sg1_plus_covariance,0.9203559027777778,0.6057326131647109

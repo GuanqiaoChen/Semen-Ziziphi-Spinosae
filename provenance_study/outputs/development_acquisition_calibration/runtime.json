@@ -1,0 +1,18 @@
+{
+  "started_utc": "2026-07-23T00:19:06.943819+00:00",
+  "elapsed_seconds": 429.33479920000536,
+  "python": "3.11.9",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "numpy": "2.4.4",
+  "scipy": "1.17.1",
+  "sklearn": "1.8.0",
+  "n_development_seeds": 1012,
+  "expected_bands": 392,
+  "data_access_audit": {
+    "manifest_hash_files": false,
+    "locked_numeric_reads": 0,
+    "locked_byte_reads": 0,
+    "development_split_only": true
+  },
+  "data_fingerprint_sha256": "43b0daabd384ebd5d2e3a42e7125211e96496a67c05c4263473394ef2a7b0c19"
+}

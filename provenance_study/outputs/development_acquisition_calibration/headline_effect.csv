@@ -1,0 +1,10 @@
+﻿comparison,metric,point_reduction,ci_low,ci_high,fraction_bootstrap_positive
+uncalibrated_minus_shift_aware_temperature,expected_calibration_error,0.028341285761423515,0.00927687065341436,0.03474428422864562,0.998
+uncalibrated_minus_iid_temperature,expected_calibration_error,0.029026655318739436,0.008843211099314243,0.03545888087882889,0.998
+iid_minus_shift_aware,expected_calibration_error,-0.0006853695573159208,-0.001453898627164628,0.0015427663163481821,0.4255
+uncalibrated_minus_shift_aware_temperature,negative_log_likelihood,0.057105316962131,0.02047347934437651,0.09837887744607497,1.0
+uncalibrated_minus_iid_temperature,negative_log_likelihood,0.057754748450941806,0.02035475681490321,0.09981442268578117,1.0
+iid_minus_shift_aware,negative_log_likelihood,-0.0006494314888108033,-0.0015573628845152467,8.197379741398576e-05,0.0475
+uncalibrated_minus_shift_aware_temperature,multiclass_brier_score,0.00541051616828353,-0.0010658686183274296,0.012323200992067984,0.9555
+uncalibrated_minus_iid_temperature,multiclass_brier_score,0.00549970338729508,-0.0011119982511385198,0.01259610116870737,0.954
+iid_minus_shift_aware,multiclass_brier_score,-8.918721901154947e-05,-0.0002521855664102568,5.6628057614711125e-05,0.122
