@@ -1,9 +1,0 @@
-{
-  "observed_effect": 0.13151041666666666,
-  "n_label_pairs": 8,
-  "n_exact_sign_assignments": 256,
-  "alternative_preregistered": "greater: fusion_net(full) > fusion_net(spatial_shuffle)",
-  "p_value_greater": 0.04296875,
-  "p_value_two_sided_sensitivity": 0.0859375,
-  "test_scope": "exact sign-flip across eight observed label-pair effects; conditional, not new-lot inference"
-}

@@ -1,8 +1,0 @@
-{
-  "status": "passed",
-  "n_samples_checked": 1264,
-  "absolute_tolerance": 1e-05,
-  "global_max_absolute_difference": 2.8260271922597724e-07,
-  "n_outside_tolerance": 0,
-  "purpose": "representation integrity only; not model selection or tuning"
-}

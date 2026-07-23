@@ -1,54 +1,77 @@
-# 酸枣仁高光谱研究：来源立方体隔离审计
+# Acquisition-robust hyperspectral provenance of *Ziziphi Spinosae* Semen
 
-本仓库已完成一套**结果前冻结、来源立方体完全隔离、包含强基线与反事实证伪**的当前数据分析。研究对象是 8 个存档商业样品标签、16 个来源高光谱立方体和 1,264 粒立方体内技术子样本；不会把种子数误写成独立产地重复。
+This branch (`acquisition`) contains **only** the acquisition-robust geographical-origin
+traceability study for *Ziziphi Spinosae* Semen (酸枣仁) and the shared infrastructure it
+depends on. Other research rounds (the first-round classical protocol, the source-cube deep
+audit, and their documents) live on `main`; they were removed from this branch to keep it a
+self-contained record of this study.
 
-`original` 是不可变审计基线；初始 Python 算法和 MATLAB 提取脚本只在该分支及本地忽略副本中保留，不属于 `main` 当前发布树。`main` 的正式代码由 `current_data_study/` 经典审计和 `deep_models/` 预注册方法组成，独立于旧脚本并按预注册、泄漏安全且可审计的方法学标准设计。当前唯一正式深度分析入口是 [deep_models/source_cube_audit.py](deep_models/source_cube_audit.py)，完整协议与复现说明见 [deep_models/README.md](deep_models/README.md)。
+## Scientific question
 
-## 正式分析状态
+Same-cube random splits make hyperspectral origin classification look near-perfect by letting
+image-specific signals leak across the evaluation boundary. This study asks the question the
+current archive can answer honestly: **when the acquisition cube (source image) changes, does
+origin classification stay accurate and well-calibrated?**
 
-- 预注册协议：[来源立方体预注册分析方案](docs/来源立方体预注册分析方案.md)
-- 正式运行：`executed_complete`，2 个互反方向 × 3 个模型 × 3 个固定优化种子，按运行清单共 18 个训练单元（含 SNV–LR 拟合）
-- 数据隔离：所有 `*-1` 来源立方体开发、所有 `*-2` 测试，以及完全反向测试；测试立方体不参与选择、早停或温度校准
-- 模型：SNV–LR 强基线、`spectral_only` 深度光谱消融、`fusion_net` 高效谱空融合网络
-- 证伪：每个锁定神经模型均在不重新拟合的前提下评估 `full`、`spatial_shuffle`、`mean_broadcast` 和 `mask_only`
-- 主要预测器：3 个预声明种子的温度校准概率平均集成
-- 主要估计量：两个方向 balanced accuracy 等权平均的 \(\theta\)
+## Method (frozen)
 
-## 正式结果
+Whole-source-cube transfer is the primary evaluation axis: train on one acquisition cube, test
+on the other, both directions. The frozen deployment pipeline
+([`provenance_study/acquisition_robust_pipeline.py`](provenance_study/acquisition_robust_pipeline.py))
+is:
 
-| 模型 | \(\theta\) | 条件性 95% 区间 |
-| --- | ---: | ---: |
-| SNV–LR | 86.94% | 75.38%–96.20% |
-| `spectral_only` | 44.75% | 25.31%–63.58% |
-| `fusion_net` | 45.94% | 31.98%–60.70% |
+1. Savitzky–Golay first derivative (window 15, poly 2) — most transfer-robust representation;
+2. training-cube standardization;
+3. **unlabelled target-acquisition normalization** — the incoming cube (a batch of unknown-origin
+   seeds) is standardized on its own statistics, removing a per-cube affine batch effect;
+4. shrinkage LDA;
+5. a single post-hoc temperature fit on the training cube's constructed-batch-grouped OOF.
 
-`fusion_net(full) - fusion_net(spatial_shuffle)` 为 13.15 个百分点（条件性 95% 区间 1.82–24.38）；8 标签对精确单侧 sign-flip `p=0.0429688`，双侧敏感性 `p=0.0859375`，并达到预声明的有限空间排列支持门槛。但效应高度方向不对称（0.78 与 25.52 个百分点）。
+## Key development results (constructed batches 0–7)
 
-融合模型相对 `spectral_only` 仅高 1.19 个百分点（区间 −11.29–15.55），没有稳定谱空增益；相对 SNV–LR 低 41.00 个百分点（区间 −50.86–−31.46）。因此，当前数据支持的是一个严格、可证伪的来源立方体迁移审计，而不是“深度模型优于强光谱基线”。
+| Step | cross-cube balanced accuracy |
+|---|---|
+| SNV-LR weak baseline | 85.7% |
+| SG1 + shrinkage LDA | 93.6% |
+| + unlabelled target-cube normalization | 95.1% (+1.45 pp, 95% CI [+0.75, +2.11]) |
 
-完整双语摘要、条件性区间与图表见：
+Temperature calibration cut cross-cube ECE 0.038→0.010 and NLL 0.236→0.179. Retained **negatives**:
+within-seed pixel-covariance features hurt transfer; grouped calibration/conformal did not beat
+i.i.d. versions.
 
-- [正式后处理摘要](deep_models/outputs/source_cube_preregistered_audit/postprocessing/summary.md)
-- [机器可读正式结果](deep_models/outputs/source_cube_preregistered_audit/results.json)
-- [空间机制预声明判定](deep_models/outputs/source_cube_preregistered_audit/spatial_mechanism_decision.json)
-- [主性能图](deep_models/outputs/source_cube_preregistered_audit/postprocessing/figure_main_performance.pdf)
-- [反事实效应图](deep_models/outputs/source_cube_preregistered_audit/postprocessing/figure_counterfactual_effects.pdf)
-- [集成混淆矩阵](deep_models/outputs/source_cube_preregistered_audit/postprocessing/figure_ensemble_confusion_matrices.pdf)
-- [校准可靠性图](deep_models/outputs/source_cube_preregistered_audit/postprocessing/figure_calibration_reliability.pdf)
+## One-shot locked confirmation (reserved batches 8–9, opposite cube)
 
-## 论文与研究记录
+Frozen pipeline **93.3%** balanced accuracy vs 85.5% for SNV-LR (+7.8 pp, 95% CI [+0.95, +12.2]);
+three of four pre-registered gates evaluated, all passed. See
+[`provenance_study/outputs/acquisition_locked_confirmation/`](provenance_study/outputs/acquisition_locked_confirmation/)
+(including `NOTES.md`, which discloses one pre-registration deviation).
 
-- [当前数据英文重写稿](paper/manuscript_current_data_reframed.md)
-- [正式执行与结果审计](docs/来源立方体预注册分析执行与结果审计.md)
-- [研究审查与修订总账](docs/研究审查与修订总账.md)
-- [现有数据研究重构方案](docs/现有数据条件下的研究重构方案.md)
-- [数据采集协作需求书](docs/数据采集需求.md)
-- [经典光谱基线与遗留结果说明](current_data_study/README.md)
+## Layout
 
-## 结论边界
+- `provenance_study/acquisition_robust_pipeline.py` — frozen predictor.
+- `provenance_study/explore_acquisition_calibration.py` — development comparator matrix.
+- `provenance_study/make_acquisition_figures.py` — publication figures.
+- `provenance_study/run_acquisition_locked_confirmation.py` — fail-closed one-shot locked entry.
+- `provenance_study/core.py`, `__init__.py` — shared leakage-safe loaders/transforms (dependency).
+- `provenance_study/exploration_probes/` — exploratory diagnostics that informed the frozen method.
+- `provenance_study/outputs/` — development and locked machine tables and figures.
+- `docs/采集域稳健产地溯源方法与锁定验证方案.md` — result-before-freeze pre-registration.
+- `docs/研究审查与修订总账.md` — append-only revision ledger (full project governance record).
+- `paper/manuscript_acquisition_robust_provenance.md` — manuscript draft.
+- `data/` — 16 source-image directories of paired CSV/MAT seed spectra.
 
-所有区间和检验都只条件于当前 16 个存档来源立方体。每类、每个测试方向只有 1 个测试来源立方体，两个后缀是否对应独立批次或采集会话也没有充分元数据；优化种子不是生物重复。当前结果不能证明地理产地认证、真实溯源、化学机制、开放集识别或对新农场、批次、年份、供应商、仪器和实验室的外部泛化。
+## Run
 
-若要获得上述证据，仍需按 [数据采集协作需求书](docs/数据采集需求.md) 增加可追溯独立来源、多年份/批次、混板采集、跨设备或实验室验证、配对化学测定与锁定外部测试。
+```powershell
+.venv\Scripts\python.exe -m pytest provenance_study/tests -q
+.venv\Scripts\python.exe -m provenance_study.explore_acquisition_calibration
+.venv\Scripts\python.exe -m provenance_study.make_acquisition_figures
+```
 
-此后修改论文、方法、代码、数据、结果或图表，必须按 [AGENTS.md](AGENTS.md) 在中文总账末尾追加对应记录，不得把计划分析写成已执行结果。
+The locked entry is fail-closed and runs only with `--confirm-locked-test UNLOCK_BATCHES_8_9`.
+
+## Scope boundary
+
+Two source images per origin makes whole-cube transfer an acquisition-robustness stress test, not
+external geographical certification. Constructed batches are deterministic subdivisions of the same
+16 images, not independent physical lots, farms, years, or instruments.
